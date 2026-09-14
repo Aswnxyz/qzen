@@ -1,64 +1,66 @@
 const steps = [
   {
     number: "01",
-    title: "Business creates a queue",
+    title: "Scan",
     description:
-      "Set up a queue for your clinic, salon, service center, or any walk-in service.",
+      "Open the queue link by scanning the QR code at your business.",
   },
   {
     number: "02",
-    title: "Customer scans the QR",
+    title: "Join",
     description:
-      "Customers scan the displayed QR code using their phone. No app or account required.",
+      "Enter your name and receive a digital token in seconds.",
   },
   {
     number: "03",
-    title: "Customer gets a token",
+    title: "Relax",
     description:
-      "Qzen instantly assigns a token and shows the customer's position in the queue.",
+      "Follow your live position and estimated wait from your phone.",
   },
   {
     number: "04",
-    title: "Relax until your turn",
+    title: "Get served",
     description:
-      "Customers can leave the waiting area and keep track of the queue from their phone.",
+      "Return when your token is called—without the physical line.",
   },
 ];
 
 export default function HowItWorks() {
   return (
-    <section className="bg-zinc-50 px-6 py-24">
-      <div className="mx-auto max-w-6xl">
-        <div className="max-w-2xl">
-          <p className="text-sm font-semibold uppercase tracking-widest text-zinc-500">
+    <section className="border-y border-qzen-border bg-qzen-surface-muted px-5 py-20 sm:px-8 sm:py-28">
+      <div className="mx-auto max-w-7xl">
+        <div className="max-w-xl">
+          <p className="text-sm font-semibold uppercase tracking-[0.16em] text-qzen-brand">
             How it works
           </p>
 
-          <h2 className="mt-3 text-3xl font-bold tracking-tight text-zinc-900 sm:text-4xl">
-            Waiting doesn't have to feel like waiting.
+          <h2 className="mt-4 text-3xl font-bold tracking-[-0.045em] text-qzen-text sm:text-4xl">
+            A better wait starts with one scan.
           </h2>
 
-          <p className="mt-4 text-lg leading-8 text-zinc-600">
-            Qzen turns a traditional paper-token queue into a simple digital
-            experience for both businesses and customers.
+          <p className="mt-4 text-lg leading-8 text-qzen-text-secondary">
+            A straightforward digital experience for customers and staff.
           </p>
         </div>
 
-        <div className="mt-14 grid gap-8 sm:grid-cols-2 lg:grid-cols-4">
+        <div className="mt-12 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
           {steps.map((step) => (
-            <div key={step.number}>
-              <span className="text-sm font-semibold text-zinc-400">
+            <article
+              key={step.number}
+              className="rounded-qzen-lg border border-qzen-border bg-qzen-surface p-6 shadow-qzen-sm"
+            >
+              <span className="inline-flex h-10 w-10 items-center justify-center rounded-qzen-md bg-qzen-brand-soft text-sm font-bold text-qzen-brand-strong">
                 {step.number}
               </span>
 
-              <h3 className="mt-4 text-lg font-semibold text-zinc-900">
+              <h3 className="mt-6 text-qzen-title font-semibold tracking-[-0.02em] text-qzen-text">
                 {step.title}
               </h3>
 
-              <p className="mt-3 text-sm leading-6 text-zinc-600">
+              <p className="mt-3 text-sm leading-6 text-qzen-text-secondary">
                 {step.description}
               </p>
-            </div>
+            </article>
           ))}
         </div>
       </div>

@@ -1,53 +1,66 @@
 const features = [
   {
-    title: "No app required",
+    number: "01",
+    title: "Live queue position",
     description:
-      "Customers scan a QR code and join the queue directly from their phone. No download or account required.",
+      "Customers see their token and exactly where they stand in the queue.",
   },
   {
-    title: "Digital tokens",
+    number: "02",
+    title: "Estimated wait time",
     description:
-      "Every customer receives a unique token and can see exactly where they are in the queue.",
+      "A clear estimate helps people plan their time with confidence.",
   },
   {
-    title: "Live updates",
+    number: "03",
+    title: "Real-time updates",
     description:
-      "Queue status updates automatically so customers always know when their turn is getting closer.",
+      "Every call, pause, and update is reflected as the queue moves.",
+  },
+  {
+    number: "04",
+    title: "Simple staff management",
+    description:
+      "Staff can call the next customer and keep service moving from one view.",
   },
 ];
 
 export default function Features() {
   return (
-    <section className="px-6 py-24">
-      <div className="mx-auto max-w-6xl">
-        <div className="max-w-2xl">
-          <p className="text-sm font-semibold uppercase tracking-widest text-zinc-500">
-            Why Qzen
+    <section className="px-5 py-20 sm:px-8 sm:py-28">
+      <div className="mx-auto max-w-7xl">
+        <div className="max-w-xl">
+          <p className="text-sm font-semibold uppercase tracking-[0.16em] text-qzen-brand">
+            Built for better service
           </p>
 
-          <h2 className="mt-3 text-3xl font-bold tracking-tight text-zinc-900 sm:text-4xl">
-            A better way to wait.
+          <h2 className="mt-4 text-3xl font-bold tracking-[-0.045em] text-qzen-text sm:text-4xl">
+            Everything a modern queue needs.
           </h2>
 
-          <p className="mt-4 text-lg leading-8 text-zinc-600">
-            Simple for customers. Powerful for businesses.
+          <p className="mt-4 text-lg leading-8 text-qzen-text-secondary">
+            Less uncertainty for customers. Less friction for your team.
           </p>
         </div>
 
-        <div className="mt-14 grid gap-6 md:grid-cols-3">
+        <div className="mt-12 grid gap-4 md:grid-cols-2">
           {features.map((feature) => (
-            <div
+            <article
               key={feature.title}
-              className="rounded-2xl border border-zinc-200 p-8"
+              className="group rounded-qzen-lg border border-qzen-border bg-qzen-surface p-6 shadow-qzen-sm hover:-translate-y-0.5 hover:border-qzen-border-strong hover:shadow-qzen-md sm:p-8"
             >
-              <h3 className="text-xl font-semibold text-zinc-900">
+              <span className="text-sm font-bold tracking-[0.14em] text-qzen-accent">
+                {feature.number}
+              </span>
+
+              <h3 className="mt-8 text-qzen-title font-semibold tracking-[-0.025em] text-qzen-text">
                 {feature.title}
               </h3>
 
-              <p className="mt-4 leading-7 text-zinc-600">
+              <p className="mt-3 max-w-sm leading-7 text-qzen-text-secondary">
                 {feature.description}
               </p>
-            </div>
+            </article>
           ))}
         </div>
       </div>

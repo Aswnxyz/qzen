@@ -1,38 +1,5 @@
 import Link from "next/link";
 
-// export default function Navbar() {
-//   return (
-//     <nav className="flex items-center justify-between px-8 py-5">
-//       {/* <h2 className="text-2xl font-bold">Qzen</h2> */}
-//       <Link href="/" className="text-2xl font-bold">
-//         Qzen
-//       </Link>
-
-//       <div className="flex items-center gap-6">
-//         {/* <a href="#" className="text-sm font-medium">
-//           Login
-//         </a> */}
-//         <Link href="/login" className="text-sm font-medium">
-//           Login
-//         </Link>
-
-//         {/* <a
-//           href="#"
-//           className="rounded-full bg-black px-5 py-2.5 text-sm font-medium text-white"
-//         >
-//           Get Started
-//         </a> */}
-//         <Link
-//           href="/signup"
-//           className="rounded-full bg-black px-5 py-2.5 text-sm font-medium text-white"
-//         >
-//           Get Started
-//         </Link>
-//       </div>
-//     </nav>
-//   );
-// }
-
 interface NavbarProps {
   isAuthenticated: boolean;
   hasBusiness: boolean;
@@ -52,23 +19,34 @@ export default function Navbar({ isAuthenticated, hasBusiness }: NavbarProps) {
       : "/onboarding";
 
   return (
-    <nav className="flex items-center justify-between px-8 py-5">
-      <Link href="/" className="text-2xl font-bold">
-        Qzen
-      </Link>
-
-      <div className="flex items-center gap-6">
-        <Link href={loginDestination} className="text-sm font-medium">
-          Login
-        </Link>
-
+    <header className="border-b border-qzen-border/80 bg-qzen-surface/90 backdrop-blur">
+      <nav
+        aria-label="Main navigation"
+        className="mx-auto flex max-w-7xl items-center justify-between gap-4 px-5 py-4 sm:px-8"
+      >
         <Link
-          href={ownerDestination}
-          className="rounded-full bg-black px-5 py-2.5 text-sm font-medium text-white"
+          href="/"
+          className="text-xl font-bold tracking-[-0.04em] text-qzen-brand-strong sm:text-2xl"
         >
-          Get Started
+          Qzen
         </Link>
-      </div>
-    </nav>
+
+        <div className="flex items-center gap-3 sm:gap-5">
+          <Link
+            href={loginDestination}
+            className="px-2 py-2 text-sm font-medium text-qzen-text-secondary hover:text-qzen-brand-strong"
+          >
+            Login
+          </Link>
+
+          <Link
+            href={ownerDestination}
+            className="rounded-qzen-md bg-qzen-brand px-3.5 py-2.5 text-sm font-semibold text-white shadow-qzen-sm hover:bg-qzen-brand-strong sm:px-5"
+          >
+            Get started
+          </Link>
+        </div>
+      </nav>
+    </header>
   );
 }
