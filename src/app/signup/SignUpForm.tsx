@@ -1,8 +1,9 @@
 "use client";
 
-import { FormEvent, useState } from "react";
+import { FormEvent, useRef, useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { authClient } from "@/lib/auth-client";
+import { signupSchema } from "@/lib/validations/auth";
 
 export default function SignUpPage() {
   const router = useRouter();
@@ -10,6 +11,8 @@ export default function SignUpPage() {
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [showPassword, setShowPassword] = useState(false);
+  const passwordTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   const [loading, setLoading] = useState(false);
   const [googleLoading, setGoogleLoading] = useState(false);
@@ -20,6 +23,18 @@ export default function SignUpPage() {
 
     setError("");
     setLoading(true);
+
+    const result = signupSchema.safeParse({
+      name,
+      email,
+      password,
+    });
+
+    if (!result.success) {
+      setError(result.error.issues[0].message);
+      setLoading(false);
+      return;
+    }
 
     const { error } = await authClient.signUp.email({
       name,
@@ -50,6 +65,14 @@ export default function SignUpPage() {
       setGoogleLoading(false);
     }
   }
+
+  useEffect(() => {
+    return () => {
+      if (passwordTimeoutRef.current) {
+        clearTimeout(passwordTimeoutRef.current);
+      }
+    };
+  }, []);
 
   const isLoading = loading || googleLoading;
 
@@ -163,17 +186,65 @@ export default function SignUpPage() {
                 Password
               </label>
 
-              <input
-                id="password"
-                type="password"
-                value={password}
-                onChange={(event) => setPassword(event.target.value)}
-                required
-                minLength={8}
-                autoComplete="new-password"
-                placeholder="Create a password"
-                className="mt-2 w-full rounded-xl border border-zinc-300 px-4 py-3 outline-none transition focus:border-emerald-700 focus:ring-2 focus:ring-emerald-100"
-              />
+              <div className="relative mt-2">
+                <input
+                  id="password"
+                  type={showPassword ? "text" : "password"}
+                  value={password}
+                  onChange={(event) => setPassword(event.target.value)}
+                  required
+                  minLength={8}
+                  autoComplete="new-password"
+                  placeholder="Create a password"
+                  className="w-full rounded-xl border border-zinc-300 px-4 py-3 pr-12 outline-none transition focus:border-emerald-700 focus:ring-2 focus:ring-emerald-100"
+                />
+
+                <button
+                  type="button"
+                  aria-label="Show password temporarily"
+                  onClick={() => {
+                    if (passwordTimeoutRef.current) {
+                      clearTimeout(passwordTimeoutRef.current);
+                    }
+
+                    setShowPassword(true);
+
+                    passwordTimeoutRef.current = setTimeout(() => {
+                      setShowPassword(false);
+                      passwordTimeoutRef.current = null;
+                    }, 1000);
+                  }}
+                  className="absolute right-3 top-1/2 -translate-y-1/2 rounded-lg p-2 text-zinc-500 transition hover:bg-zinc-100 hover:text-zinc-700 focus:outline-none focus-visible:ring-2 focus-visible:ring-emerald-600"
+                >
+                  {showPassword ? (
+                    <svg
+                      aria-hidden="true"
+                      viewBox="0 0 24 24"
+                      fill="none"
+                      stroke="currentColor"
+                      strokeWidth="2"
+                      className="h-5 w-5"
+                    >
+                      <path d="M3 3l18 18" />
+                      <path d="M10.6 10.6a2 2 0 0 0 2.8 2.8" />
+                      <path d="M9.9 4.2A10.8 10.8 0 0 1 12 4c5 0 8.5 4 10 8-0.5 1.3-1.2 2.4-2 3.4" />
+                      <path d="M6.2 6.2C4.6 7.4 3.5 9 2 12c1.5 4 5 8 10 8 1.5 0 2.9-.4 4.1-1" />
+                    </svg>
+                  ) : (
+                    <svg
+                      aria-hidden="true"
+                      viewBox="0 0 24 24"
+                      fill="none"
+                      stroke="currentColor"
+                      strokeWidth="2"
+                      className="h-5 w-5"
+                    >
+                      <path d="M2 12s3.5-6 10-6 10 6 10 6-3.5 6-10 6S2 12 2 12Z" />
+                      <circle cx="12" cy="12" r="2.5" />
+                    </svg>
+                  )}
+                </button>
+              </div>
             </div>
 
             {error && (

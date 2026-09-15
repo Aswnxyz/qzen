@@ -27,6 +27,51 @@ export const auth = betterAuth({
   emailAndPassword: {
     enabled: true,
     requireEmailVerification: true,
+    revokeSessionsOnPasswordReset: true,
+
+    sendResetPassword: async ({ user, url }) => {
+      await resend.emails.send({
+        from: "Qzen <onboarding@resend.dev>",
+        to: user.email,
+        subject: "Reset your Qzen password",
+        html: `
+        <div>
+          <h1>Reset your Qzen password</h1>
+
+          <p>We received a request to reset your Qzen password.</p>
+
+          <p>
+            Click the button below to create a new password:
+          </p>
+
+          <p>
+            <a
+              href="${url}"
+              style="
+                display: inline-block;
+                padding: 12px 20px;
+                background-color: #047857;
+                color: white;
+                text-decoration: none;
+                border-radius: 8px;
+                font-weight: 600;
+              "
+            >
+              Reset Password
+            </a>
+          </p>
+
+          <p>
+            If you didn't request a password reset, you can safely ignore this email.
+          </p>
+
+          <p>
+            This password reset link will expire in 1 hour.
+          </p>
+        </div>
+      `,
+      });
+    },
   },
   plugins: [
     emailOTP({
