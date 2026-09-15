@@ -33,7 +33,7 @@ export default async function DashboardPage() {
             </h1>
 
             <p className="mt-2 text-zinc-600">
-              Manage your queues and monitor today's activity.
+              Manage your queues and monitor Today&apos;s activity.
             </p>
           </div>
 
@@ -53,7 +53,7 @@ export default async function DashboardPage() {
               </h2>
 
               <p className="mt-1 text-sm text-zinc-500">
-                Today's queue activity at a glance.
+                Today&apos;s queue activity at a glance.
               </p>
             </div>
 

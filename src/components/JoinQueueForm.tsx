@@ -16,7 +16,13 @@ export default function JoinQueueForm({
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
 
-  const [entryId, setEntryId] = useState<string | null>(null);
+  const [entryId, setEntryId] = useState<string | null>(() => {
+    if (typeof window === "undefined") {
+      return null;
+    }
+
+    return localStorage.getItem(`qzen-ticket-${queueId}`);
+  });
   const [tokenNumber, setTokenNumber] = useState<number | null>(null);
 
   const [currentToken, setCurrentToken] = useState<number | null>(null);
@@ -25,13 +31,13 @@ export default function JoinQueueForm({
   const [customerStatus, setCustomerStatus] = useState("waiting");
   const [currentQueueStatus, setCurrentQueueStatus] = useState(queueStatus);
 
-  useEffect(() => {
-    const savedEntryId = localStorage.getItem(`qzen-ticket-${queueId}`);
+  // useEffect(() => {
+  //   const savedEntryId = localStorage.getItem(`qzen-ticket-${queueId}`);
 
-    if (savedEntryId) {
-      setEntryId(savedEntryId);
-    }
-  }, [queueId]);
+  //   if (savedEntryId) {
+  //     setEntryId(savedEntryId);
+  //   }
+  // }, [queueId]);
 
   useEffect(() => {
     async function fetchStatus() {
@@ -198,7 +204,7 @@ export default function JoinQueueForm({
     return (
       <div className="mt-8 text-center">
         <p className="text-sm font-medium uppercase tracking-widest text-zinc-400">
-          You're in!
+          You&apos;re in!
         </p>
 
         <p className="mt-6 text-sm text-zinc-500">Your token</p>

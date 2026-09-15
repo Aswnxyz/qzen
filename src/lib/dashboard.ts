@@ -58,7 +58,10 @@ export async function getBusinessDashboard(ownerId: string) {
   );
 
   return {
-    business,
-    queues: queueCards.filter(Boolean),
-  };
+  business,
+  queues: queueCards.filter(
+    (item): item is NonNullable<(typeof queueCards)[number]> =>
+      item !== null,
+  ),
+};
 }

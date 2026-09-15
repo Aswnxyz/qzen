@@ -32,32 +32,33 @@ export default function ResetPasswordForm() {
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
 
-  const passwordTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(
-    null
-  );
-  const confirmPasswordTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(
-    null
-  );
+  const passwordTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const confirmPasswordTimeoutRef = useRef<ReturnType<
+    typeof setTimeout
+  > | null>(null);
 
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
   const [success, setSuccess] = useState(false);
 
   useEffect(() => {
+    const passwordTimeout = passwordTimeoutRef.current;
+    const confirmPasswordTimeout = confirmPasswordTimeoutRef.current;
+
     return () => {
-      if (passwordTimeoutRef.current) {
-        clearTimeout(passwordTimeoutRef.current);
+      if (passwordTimeout) {
+        clearTimeout(passwordTimeout);
       }
 
-      if (confirmPasswordTimeoutRef.current) {
-        clearTimeout(confirmPasswordTimeoutRef.current);
+      if (confirmPasswordTimeout) {
+        clearTimeout(confirmPasswordTimeout);
       }
     };
   }, []);
 
   function temporarilyShowPassword(
     setVisible: (visible: boolean) => void,
-    timeoutRef: React.MutableRefObject<ReturnType<typeof setTimeout> | null>
+    timeoutRef: React.MutableRefObject<ReturnType<typeof setTimeout> | null>,
   ) {
     if (timeoutRef.current) {
       clearTimeout(timeoutRef.current);
@@ -100,8 +101,7 @@ export default function ResetPasswordForm() {
 
     if (error) {
       setError(
-        error.message ||
-          "This password reset link is invalid or has expired."
+        error.message || "This password reset link is invalid or has expired.",
       );
       setLoading(false);
       return;
@@ -165,8 +165,8 @@ export default function ResetPasswordForm() {
               role="alert"
               className="mt-8 rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700"
             >
-              This password reset link is invalid or has expired. Please
-              request a new one.
+              This password reset link is invalid or has expired. Please request
+              a new one.
             </div>
           )}
 
@@ -208,7 +208,7 @@ export default function ResetPasswordForm() {
                     onClick={() =>
                       temporarilyShowPassword(
                         setShowPassword,
-                        passwordTimeoutRef
+                        passwordTimeoutRef,
                       )
                     }
                     className="absolute right-3 top-1/2 -translate-y-1/2 rounded-lg p-2 text-zinc-500 transition hover:bg-zinc-100 hover:text-zinc-700 focus:outline-none focus-visible:ring-2 focus-visible:ring-emerald-600"
@@ -257,9 +257,7 @@ export default function ResetPasswordForm() {
                     id="confirmPassword"
                     type={showConfirmPassword ? "text" : "password"}
                     value={confirmPassword}
-                    onChange={(event) =>
-                      setConfirmPassword(event.target.value)
-                    }
+                    onChange={(event) => setConfirmPassword(event.target.value)}
                     required
                     minLength={8}
                     maxLength={128}
@@ -274,7 +272,7 @@ export default function ResetPasswordForm() {
                     onClick={() =>
                       temporarilyShowPassword(
                         setShowConfirmPassword,
-                        confirmPasswordTimeoutRef
+                        confirmPasswordTimeoutRef,
                       )
                     }
                     className="absolute right-3 top-1/2 -translate-y-1/2 rounded-lg p-2 text-zinc-500 transition hover:bg-zinc-100 hover:text-zinc-700 focus:outline-none focus-visible:ring-2 focus:ring-emerald-600"

@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import QRCode from "qrcode";
+import Image from "next/image";
 
 interface QueueQRCodeProps {
   businessSlug: string;
@@ -65,9 +66,11 @@ export default function QueueQRCode({
 
   return (
     <div className="text-center">
-      <img
+      <Image
         src={qrCode}
         alt={`QR code for ${queueSlug}`}
+        width={256}
+        height={256}
         className="mx-auto h-64 w-64"
       />
       <div className="mt-6 flex justify-center gap-3 print:hidden">

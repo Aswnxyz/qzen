@@ -64,7 +64,7 @@ if (!queueSession) {
         </h1>
 
         <p className="mt-2 text-zinc-600">
-          Today's queue session could not be loaded.
+          Today&apos;s queue session could not be loaded.
         </p>
       </div>
     </main>

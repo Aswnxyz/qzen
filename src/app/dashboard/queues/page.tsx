@@ -69,7 +69,7 @@ export default async function QueuesPage() {
         <div className="mt-10 grid gap-6 md:grid-cols-2">
           {queues.length === 0 ? (
             <div className="rounded-2xl border border-zinc-200 bg-white p-8">
-              <p className="text-zinc-500">You don't have any queues yet.</p>
+              <p className="text-zinc-500">You don&apos;t have any queues yet.</p>
             </div>
           ) : (
             queuesWithSessions.map(({ queue, queueSession }) => (

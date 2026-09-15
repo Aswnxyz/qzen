@@ -67,7 +67,7 @@ export default function OnboardingPage() {
           </h1>
 
           <p className="mt-2 text-zinc-600">
-            Let's get your first queue ready.
+            Let&apos;s get your first queue ready.
           </p>
         </div>
 
