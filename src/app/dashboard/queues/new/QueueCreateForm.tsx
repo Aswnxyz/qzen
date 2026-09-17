@@ -3,7 +3,7 @@
 import { FormEvent, useState } from "react";
 import { useRouter } from "next/navigation";
 
-export default function QueueSetupPage() {
+export default function QueueCreateForm() {
   const router = useRouter();
 
   const [queueName, setQueueName] = useState("");
@@ -68,44 +68,32 @@ export default function QueueSetupPage() {
       <div className="relative mx-auto flex w-full max-w-7xl flex-1 flex-col">
         {/* Header */}
         <header className="flex items-center justify-between">
-          <div>
-            <p className="text-xl font-bold tracking-[-0.04em] text-qzen-text">
-              Qzen
-            </p>
-          </div>
+          <p className="text-xl font-bold tracking-[-0.04em] text-qzen-text">
+            Qzen
+          </p>
 
-          <div className="flex items-center gap-3 text-sm text-qzen-text-secondary">
-            <span className="hidden sm:inline">Setup</span>
-
-            <span className="text-qzen-text-subtle">
-              01
-            </span>
-
-            <span className="text-qzen-text-subtle">/</span>
-
-            <span className="font-semibold text-qzen-brand">
-              02
-            </span>
-          </div>
+          <span className="text-sm font-medium text-qzen-text-secondary">
+            Queue management
+          </span>
         </header>
 
         {/* Main content */}
-        <div className="flex flex-1 items-center justify-center py-14 sm:py-10">
+        <div className="flex flex-1 items-center justify-center py-8 sm:py-10">
           <section className="w-full max-w-xl -translate-y-2 sm:-translate-y-4">
             {/* Intro */}
             <div className="text-center">
               <div className="mx-auto inline-flex items-center gap-2 rounded-full border border-qzen-border bg-qzen-surface px-3 py-1.5 text-xs font-semibold uppercase tracking-[0.16em] text-qzen-brand-strong">
                 <span className="h-1.5 w-1.5 rounded-full bg-qzen-accent" />
-                Step 2 of 2
+                New queue
               </div>
 
               <h1 className="mt-6 text-4xl font-bold tracking-[-0.05em] text-qzen-text sm:text-5xl">
-                Create your first queue
+                Create a new queue
               </h1>
 
               <p className="mx-auto mt-4 max-w-md text-base leading-7 text-qzen-text-secondary sm:text-lg">
-                Give your queue a name so customers and staff know
-                what it is for.
+                Add another queue to your business and start managing
+                customers with Qzen.
               </p>
             </div>
 
@@ -161,20 +149,9 @@ export default function QueueSetupPage() {
               </form>
 
               <p className="mt-5 text-center text-xs leading-5 text-qzen-text-subtle">
-                You can create more queues later.
+                You can create more queues whenever you need.
               </p>
             </div>
-
-            {/* Progress */}
-            <div className="mx-auto mt-8 flex max-w-xs items-center gap-3">
-              <div className="h-1.5 flex-1 rounded-full bg-qzen-brand" />
-
-              <div className="h-1.5 flex-1 rounded-full bg-qzen-brand" />
-            </div>
-
-            <p className="mt-3 text-center text-xs text-qzen-text-subtle">
-              Queue setup
-            </p>
           </section>
         </div>
       </div>

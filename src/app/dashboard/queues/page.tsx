@@ -59,7 +59,7 @@ export default async function QueuesPage() {
           </div>
 
           <Link
-            href="/onboarding/queue"
+            href="/dashboard/queues/new"
             className="rounded-full bg-black px-5 py-3 text-sm font-medium text-white transition hover:bg-zinc-800"
           >
             Create Queue

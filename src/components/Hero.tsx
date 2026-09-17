@@ -27,8 +27,8 @@ export default function Hero({ isAuthenticated, hasBusiness }: HeroProps) {
           </h1>
 
           <p className="mt-6 max-w-xl text-lg leading-8 text-qzen-text-secondary sm:text-xl">
-            Qzen lets customers join digitally, track their position, and get
-            on with their day instead of waiting in line.
+            Qzen lets customers join digitally, track their position, and get on
+            with their day instead of waiting in line.
           </p>
 
           <div className="mt-9 flex flex-col gap-3 sm:flex-row">
@@ -52,8 +52,18 @@ export default function Hero({ isAuthenticated, hasBusiness }: HeroProps) {
           </p>
         </div>
 
-        <div className="mx-auto w-full max-w-md lg:max-w-none">
-          <div className="rounded-qzen-xl border border-qzen-border bg-qzen-surface p-3 shadow-qzen-lg sm:p-5">
+        <div className="relative mx-auto w-full max-w-md lg:max-w-none">
+          <div className="relative rounded-qzen-xl border border-qzen-border bg-qzen-surface p-3 shadow-qzen-lg sm:p-5">
+            <div
+              aria-hidden="true"
+              className="pointer-events-none absolute -right-8 -top-5 hidden h-14 w-14 sm:block"
+            >
+              <span className="absolute right-8 top-1 h-8 w-0.5 rotate-[25deg] rounded-full bg-qzen-brand" />
+
+              <span className="absolute right-2 top-5 h-10 w-0.5 rotate-[55deg] rounded-full bg-qzen-brand" />
+
+              <span className="absolute right-0 top-10 h-6 w-0.5 rotate-[75deg] rounded-full bg-qzen-brand" />
+            </div>
             <div className="rounded-qzen-lg bg-qzen-brand-strong px-5 py-5 text-white sm:px-6">
               <div className="flex items-center justify-between gap-4 text-sm">
                 <span className="font-medium text-white/80">Qzen queue</span>

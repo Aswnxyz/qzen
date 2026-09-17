@@ -12,6 +12,7 @@ export default function VerifyEmailPage() {
 
   const [otp, setOtp] = useState("");
   const [loading, setLoading] = useState(false);
+  const [verified, setVerified] = useState(false);
   const [error, setError] = useState("");
 
   async function handleSubmit(event: FormEvent<HTMLFormElement>) {
@@ -40,7 +41,59 @@ export default function VerifyEmailPage() {
       return;
     }
 
-    router.push("/onboarding");
+    setVerified(true);
+    setLoading(false);
+  }
+
+  if (verified) {
+    return (
+      <main className="flex min-h-screen items-center justify-center bg-zinc-50 px-6 py-12">
+        <section className="w-full max-w-md">
+          <div className="rounded-3xl border border-zinc-200 bg-white p-8 text-center shadow-sm sm:p-10">
+            <p className="text-sm font-semibold uppercase tracking-[0.2em] text-emerald-700">
+              Qzen
+            </p>
+
+            <div className="mx-auto mt-8 flex h-16 w-16 items-center justify-center rounded-full bg-emerald-100">
+              <svg
+                aria-hidden="true"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="2.5"
+                className="h-8 w-8 text-emerald-700"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  d="m5 12 4 4L19 6"
+                />
+              </svg>
+            </div>
+
+            <h1 className="mt-6 text-3xl font-bold tracking-tight text-zinc-950">
+              Email verified!
+            </h1>
+
+            <p className="mt-3 text-sm leading-6 text-zinc-600">
+              Your email address has been successfully verified.
+            </p>
+
+            <p className="mt-1 text-sm leading-6 text-zinc-600">
+              You can now sign in to your Qzen account.
+            </p>
+
+            <button
+              type="button"
+              onClick={() => router.push("/login")}
+              className="mt-8 w-full rounded-full bg-emerald-800 px-6 py-3.5 font-semibold text-white transition hover:bg-emerald-900 focus:outline-none focus-visible:ring-2 focus-visible:ring-emerald-600 focus-visible:ring-offset-2"
+            >
+              Continue to sign in
+            </button>
+          </div>
+        </section>
+      </main>
+    );
   }
 
   return (

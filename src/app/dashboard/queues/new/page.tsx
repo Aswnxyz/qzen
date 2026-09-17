@@ -1,13 +1,10 @@
-
-
-
 import { redirect } from "next/navigation";
 import { getSession } from "@/lib/auth";
 import { connectDB } from "@/lib/db";
 import Business from "@/models/Business";
-import OnboardingForm from "./OnboardingForm";
+import QueueCreateForm from "./QueueCreateForm";
 
-export default async function OnboardingPage() {
+export default async function QueueCreatePage() {
   const session = await getSession();
 
   if (!session) {
@@ -20,9 +17,9 @@ export default async function OnboardingPage() {
     ownerId: session.user.id,
   });
 
-  if (business) {
-    redirect("/dashboard");
+  if (!business) {
+    redirect("/onboarding");
   }
 
-  return <OnboardingForm />;
+  return <QueueCreateForm />;
 }

@@ -35,20 +35,51 @@ export default function SignUpPage() {
       setLoading(false);
       return;
     }
+    try {
+      const response = await fetch("/api/auth/check-email", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          email,
+        }),
+      });
 
-    const { error } = await authClient.signUp.email({
-      name,
-      email,
-      password,
-    });
+      const data = await response.json();
 
-    if (error) {
-      setError(error.message || "Failed to create account.");
+      if (!response.ok) {
+        setError(data.error || "Unable to check email.");
+        setLoading(false);
+        return;
+      }
+
+      if (data.exists) {
+        setError(
+          "An account with this email already exists. Please sign in instead.",
+        );
+        setLoading(false);
+        return;
+      }
+
+      const { error } = await authClient.signUp.email({
+        name,
+        email,
+        password,
+      });
+
+      if (error) {
+        setError(error.message || "Failed to create account.");
+        setLoading(false);
+        return;
+      }
+
+      router.push(`/verify-email?email=${encodeURIComponent(email)}`);
+    } catch (error) {
+      console.error("Signup error:", error);
+      setError("Something went wrong. Please try again.");
       setLoading(false);
-      return;
     }
-
-    router.push(`/verify-email?email=${encodeURIComponent(email)}`);
   }
 
   async function handleGoogleSignUp() {
