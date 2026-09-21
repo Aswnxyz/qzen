@@ -1,8 +1,90 @@
-import Link from "next/link";
 import { redirect } from "next/navigation";
-import DashboardSidebar from "@/components/DashboardSidebar";
+import ActivityChart from "@/components/dashboard/ActivityChart";
 import { getSession } from "@/lib/auth";
 import { getBusinessDashboard } from "@/lib/dashboard";
+import DashboardStats from "@/components/dashboard/DashboardStats";
+import ActiveQueues from "@/components/dashboard/ActiveQueues";
+import YourQueues from "@/components/dashboard/YourQueues";
+import RecentActivity from "@/components/dashboard/RecentActivity";
+
+function getGreeting() {
+  const hour = new Date().getHours();
+
+  if (hour < 12) {
+    return "Good morning";
+  }
+
+  if (hour < 17) {
+    return "Good afternoon";
+  }
+
+  return "Good evening";
+}
+
+function formatDate() {
+  return new Intl.DateTimeFormat("en-US", {
+    weekday: "long",
+    month: "long",
+    day: "numeric",
+    year: "numeric",
+  }).format(new Date());
+}
+
+
+function getActivityIcon(type: string) {
+  if (type === "joined") {
+    return (
+      <div className="flex h-9 w-9 items-center justify-center rounded-full bg-emerald-50 text-emerald-600">
+        <span className="text-sm">+</span>
+      </div>
+    );
+  }
+
+  if (type === "called") {
+    return (
+      <div className="flex h-9 w-9 items-center justify-center rounded-full bg-zinc-100 text-zinc-700">
+        <span className="text-sm">→</span>
+      </div>
+    );
+  }
+
+  if (type === "completed") {
+    return (
+      <div className="flex h-9 w-9 items-center justify-center rounded-full bg-emerald-50 text-emerald-600">
+        <span className="text-sm">✓</span>
+      </div>
+    );
+  }
+
+  return (
+    <div className="flex h-9 w-9 items-center justify-center rounded-full bg-red-50 text-red-600">
+      <span className="text-sm">×</span>
+    </div>
+  );
+}
+
+function getActivityText(type: string) {
+  if (type === "joined") {
+    return "joined the queue";
+  }
+
+  if (type === "called") {
+    return "was called";
+  }
+
+  if (type === "completed") {
+    return "was completed";
+  }
+
+  return "was skipped";
+}
+
+function formatActivityTime(timestamp: Date) {
+  return new Intl.DateTimeFormat("en-US", {
+    hour: "numeric",
+    minute: "2-digit",
+  }).format(new Date(timestamp));
+}
 
 export default async function DashboardPage() {
   const session = await getSession();
@@ -14,157 +96,96 @@ export default async function DashboardPage() {
   const data = await getBusinessDashboard(session.user.id);
 
   if (!data) {
-    return <p>Business not found.</p>;
+    return (
+      <main className="flex min-h-screen items-center justify-center bg-zinc-50 px-6">
+        <div className="rounded-2xl border border-zinc-200 bg-white p-8 text-center shadow-sm">
+          <h1 className="text-xl font-semibold text-zinc-900">
+            Business not found
+          </h1>
+
+          <p className="mt-2 text-sm text-zinc-500">
+            We could not find a business associated with your account.
+          </p>
+        </div>
+      </main>
+    );
   }
 
-  const { business, queues } = data;
+  const { business, queues, stats, activity, recentActivity } = data;
+
+  const greeting = getGreeting();
+  const currentDate = formatDate();
 
   return (
-    <main className="flex min-h-screen bg-zinc-50">
-      <DashboardSidebar />
+    <div className="mx-auto max-w-[1600px] px-5 py-8 sm:px-8 lg:px-10">
+      {/* Greeting */}
+      <section className="flex flex-col justify-between gap-4 sm:flex-row sm:items-end">
+        <div>
+          <h1 className="text-3xl font-semibold tracking-tight text-zinc-950">
+            {greeting}, {business.name} 👋
+          </h1>
 
-      <section className="flex-1 p-8">
-        <header className="flex items-start justify-between gap-6">
-          <div>
-            <p className="text-sm text-zinc-500">Business Dashboard</p>
+          <p className="mt-2 text-sm text-zinc-500 sm:text-base">
+            Here&apos;s what&apos;s happening with your queues today.
+          </p>
+        </div>
 
-            <h1 className="mt-1 text-3xl font-bold text-zinc-900">
-              {business.name}
-            </h1>
+        <p className="text-sm font-medium text-zinc-400">{currentDate}</p>
+      </section>
 
-            <p className="mt-2 text-zinc-600">
-              Manage your queues and monitor Today&apos;s activity.
-            </p>
-          </div>
+      {/* KPI Cards */}
+      <DashboardStats stats={stats} />
 
-          <Link
-            href="/dashboard/queues"
-            className="rounded-full bg-black px-5 py-3 text-sm font-medium text-white transition hover:bg-zinc-800"
-          >
-            Manage Queues
-          </Link>
-        </header>
-
-        <div className="mt-10">
-          <div className="flex items-center justify-between">
+      {/* Main Content */}
+      <section className="mt-6 grid gap-6 xl:grid-cols-[minmax(0,1.65fr)_minmax(360px,0.9fr)]">
+        {/* Today's Activity */}
+        <div className="rounded-2xl border border-zinc-200 bg-white p-5 shadow-sm sm:p-6">
+          <div className="flex flex-col justify-between gap-3 sm:flex-row sm:items-start">
             <div>
-              <h2 className="text-xl font-semibold text-zinc-900">
-                Your Queues
+              <h2 className="text-lg font-semibold text-zinc-950">
+                Today&apos;s Activity
               </h2>
 
               <p className="mt-1 text-sm text-zinc-500">
-                Today&apos;s queue activity at a glance.
+                Customers joined and served throughout the day.
               </p>
             </div>
 
-            <Link
-              href="/dashboard/queues"
-              className="text-sm font-medium text-zinc-600 transition hover:text-zinc-900"
-            >
-              View all →
-            </Link>
+            <div className="flex items-center gap-4 text-xs font-medium text-zinc-500">
+              <span className="flex items-center gap-2">
+                <span className="h-2.5 w-2.5 rounded-full bg-emerald-500" />
+                Joined
+              </span>
+
+              <span className="flex items-center gap-2">
+                <span className="h-2.5 w-2.5 rounded-full bg-zinc-300" />
+                Served
+              </span>
+            </div>
           </div>
 
-          {queues.length === 0 ? (
-            <div className="mt-6 rounded-2xl border border-dashed border-zinc-300 bg-white p-10 text-center">
-              <h3 className="text-lg font-semibold text-zinc-900">
-                No queues yet
-              </h3>
-
-              <p className="mx-auto mt-2 max-w-md text-sm text-zinc-500">
-                Create your first queue to start managing customers with Qzen.
-              </p>
-
-              <Link
-                href="/dashboard/queues"
-                className="mt-6 inline-flex rounded-full bg-black px-5 py-3 text-sm font-medium text-white transition hover:bg-zinc-800"
-              >
-                Create Your First Queue
-              </Link>
-            </div>
-          ) : (
-            <div className="mt-6 grid gap-6 lg:grid-cols-2">
-              {queues.map((item) => {
-                const { queue, session, waiting, serving, servedToday } = item;
-
-                return (
-                  <div
-                    key={queue._id.toString()}
-                    className="rounded-2xl border border-zinc-200 bg-white p-6"
-                  >
-                    <div className="flex items-start justify-between gap-4">
-                      <div>
-                        <h3 className="text-xl font-semibold text-zinc-900">
-                          {queue.name}
-                        </h3>
-
-                        <p className="mt-1 text-sm text-zinc-500">
-                          Today
-                        </p>
-                      </div>
-
-                      <span
-                        className={`rounded-full px-3 py-1 text-xs font-medium capitalize ${
-                          session.status === "active"
-                            ? "bg-green-50 text-green-700"
-                            : session.status === "paused"
-                              ? "bg-amber-50 text-amber-700"
-                              : "bg-red-50 text-red-700"
-                        }`}
-                      >
-                        {session.status}
-                      </span>
-                    </div>
-
-                    <div className="mt-6 grid grid-cols-3 gap-3">
-                      <div className="rounded-xl bg-zinc-50 p-4">
-                        <p className="text-xs text-zinc-500">
-                          Waiting
-                        </p>
-
-                        <p className="mt-1 text-2xl font-bold text-zinc-900">
-                          {waiting}
-                        </p>
-                      </div>
-
-                      <div className="rounded-xl bg-zinc-50 p-4">
-                        <p className="text-xs text-zinc-500">
-                          Serving
-                        </p>
-
-                        <p className="mt-1 text-2xl font-bold text-zinc-900">
-                          {serving
-                            ? `#${serving.tokenNumber}`
-                            : "#0"}
-                        </p>
-                      </div>
-
-                      <div className="rounded-xl bg-zinc-50 p-4">
-                        <p className="text-xs text-zinc-500">
-                          Served
-                        </p>
-
-                        <p className="mt-1 text-2xl font-bold text-zinc-900">
-                          {servedToday}
-                        </p>
-                      </div>
-                    </div>
-
-                    <div className="mt-6">
-                      <Link
-                        href={`/dashboard/queue/${queue._id.toString()}`}
-                        className="block w-full rounded-full bg-black px-5 py-3 text-center text-sm font-medium text-white transition hover:bg-zinc-800"
-                      >
-                        Open Queue
-                      </Link>
-                    </div>
-                  </div>
-                );
-              })}
-            </div>
-          )}
+          <div className="mt-6">
+            <ActivityChart data={activity} />
+          </div>
         </div>
+
+        {/* Active Queues */}
+        <ActiveQueues queues={queues} />
       </section>
-    </main>
+
+      {/* Bottom Content */}
+      <section className="mt-6 grid gap-6 xl:grid-cols-[minmax(0,1.35fr)_minmax(360px,0.8fr)]">
+        {/* Your Queues */}
+        <YourQueues queues={queues} />
+
+        {/* Recent Activity */}
+        <RecentActivity
+  recentActivity={recentActivity}
+  getActivityIcon={getActivityIcon}
+  getActivityText={getActivityText}
+  formatActivityTime={formatActivityTime}
+/>
+      </section>
+    </div>
   );
 }

@@ -67,7 +67,7 @@ export default function QueueCreateForm() {
 
       <div className="relative mx-auto flex w-full max-w-7xl flex-1 flex-col">
         {/* Header */}
-        <header className="flex items-center justify-between">
+        {/* <header className="flex items-center justify-between">
           <p className="text-xl font-bold tracking-[-0.04em] text-qzen-text">
             Qzen
           </p>
@@ -75,7 +75,7 @@ export default function QueueCreateForm() {
           <span className="text-sm font-medium text-qzen-text-secondary">
             Queue management
           </span>
-        </header>
+        </header> */}
 
         {/* Main content */}
         <div className="flex flex-1 items-center justify-center py-8 sm:py-10">

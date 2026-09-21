@@ -24,12 +24,17 @@ export default function Navbar({ isAuthenticated, hasBusiness }: NavbarProps) {
         aria-label="Main navigation"
         className="mx-auto flex max-w-7xl items-center justify-between gap-4 px-5 py-4 sm:px-8"
       >
-        <Link
-          href="/"
-          className="text-xl font-bold tracking-[-0.04em] text-qzen-brand-strong sm:text-2xl"
-        >
-          Qzen
-        </Link>
+        <div>
+          <Link
+            href="/"
+            className="block text-2xl font-bold tracking-tight text-zinc-950"
+            aria-label="Qzen home"
+          >
+            Q<span className="text-emerald-600">z</span>en
+          </Link>
+
+          <p className="mt-1 text-xs text-zinc-400">Join. Relax. Get Served.</p>
+        </div>
 
         <div className="flex items-center gap-3 sm:gap-5">
           <Link

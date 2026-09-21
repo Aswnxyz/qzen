@@ -1,6 +1,5 @@
 import Link from "next/link";
 import { redirect } from "next/navigation";
-import DashboardSidebar from "@/components/DashboardSidebar";
 import { getSession } from "@/lib/auth";
 import { connectDB } from "@/lib/db";
 import Business from "@/models/Business";
@@ -88,8 +87,7 @@ export default async function QueueHistoryPage({
       : "—";
 
   return (
-    <main className="flex min-h-screen bg-zinc-50">
-      <DashboardSidebar />
+   
 
       <section className="flex-1 p-8">
         <Link
@@ -254,6 +252,5 @@ export default async function QueueHistoryPage({
           </div>
         </div>
       </section>
-    </main>
   );
 }

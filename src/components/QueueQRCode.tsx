@@ -52,6 +52,7 @@ export default function QueueQRCode({
 
     link.click();
   }
+
   function printQRCode() {
     window.print();
   }
@@ -69,28 +70,30 @@ export default function QueueQRCode({
       <Image
         src={qrCode}
         alt={`QR code for ${queueSlug}`}
-        width={256}
-        height={256}
-        className="mx-auto h-64 w-64"
+        width={200}
+        height={200}
+        className="mx-auto h-[200px] w-[200px]"
       />
-      <div className="mt-6 flex justify-center gap-3 print:hidden">
+
+      <div className="mt-4 flex justify-center gap-2.5 print:hidden">
         <button
           onClick={downloadQRCode}
-          className="rounded-full bg-black px-5 py-2.5 text-sm font-medium text-white transition hover:bg-zinc-800"
+          className="rounded-full bg-black px-4 py-2.5 text-sm font-medium text-white transition hover:bg-zinc-800"
         >
           Download QR
         </button>
 
         <button
           onClick={printQRCode}
-          className="rounded-full border border-zinc-300 px-5 py-2.5 text-sm font-medium text-zinc-900 transition hover:bg-zinc-100"
+          className="rounded-full border border-zinc-300 px-4 py-2.5 text-sm font-medium text-zinc-900 transition hover:bg-zinc-100"
         >
           Print QR
         </button>
       </div>
-      <p className="mt-4 break-all text-xs text-zinc-500 print:hidden">
+
+      <p className="mt-3 break-all text-xs leading-5 text-zinc-500 print:hidden">
         {joinUrl}
-      </p>{" "}
+      </p>
     </div>
   );
 }
