@@ -7,7 +7,7 @@ export default function QueueCreateForm() {
   const router = useRouter();
 
   const [queueName, setQueueName] = useState("");
-  const [loading, setLoading] = useState(false);
+  const [isCreating, setIsCreating] = useState(false);
   const [error, setError] = useState("");
 
   function createSlug(name: string) {
@@ -22,7 +22,7 @@ export default function QueueCreateForm() {
     event.preventDefault();
 
     setError("");
-    setLoading(true);
+    setIsCreating(true);
 
     try {
       const response = await fetch("/api/queues", {
@@ -48,7 +48,7 @@ export default function QueueCreateForm() {
       console.error(error);
       setError("Something went wrong.");
     } finally {
-      setLoading(false);
+      setIsCreating(false);
     }
   }
 
@@ -92,8 +92,8 @@ export default function QueueCreateForm() {
               </h1>
 
               <p className="mx-auto mt-4 max-w-md text-base leading-7 text-qzen-text-secondary sm:text-lg">
-                Add another queue to your business and start managing
-                customers with Qzen.
+                Add another queue to your business and start managing customers
+                with Qzen.
               </p>
             </div>
 
@@ -116,9 +116,7 @@ export default function QueueCreateForm() {
                     id="queueName"
                     type="text"
                     value={queueName}
-                    onChange={(event) =>
-                      setQueueName(event.target.value)
-                    }
+                    onChange={(event) => setQueueName(event.target.value)}
                     required
                     autoComplete="off"
                     placeholder="e.g. General Consultation"
@@ -137,14 +135,12 @@ export default function QueueCreateForm() {
 
                 <button
                   type="submit"
-                  disabled={loading}
+                  disabled={isCreating}
                   className="flex w-full items-center justify-center gap-2 rounded-qzen-md bg-qzen-brand px-6 py-3.5 text-sm font-semibold text-white shadow-qzen-sm transition hover:bg-qzen-brand-strong focus:outline-none focus-visible:ring-2 focus-visible:ring-qzen-brand focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
                 >
-                  {loading ? "Creating queue..." : "Create queue"}
+                  {isCreating ? "Creating queue..." : "Create queue"}
 
-                  {!loading && (
-                    <span aria-hidden="true">→</span>
-                  )}
+                  {!isCreating && <span aria-hidden="true">→</span>}
                 </button>
               </form>
 

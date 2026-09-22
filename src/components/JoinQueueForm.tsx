@@ -13,7 +13,7 @@ export default function JoinQueueForm({
   queueStatus,
 }: JoinQueueFormProps) {
   const [customerName, setCustomerName] = useState("");
-  const [loading, setLoading] = useState(false);
+  const [isJoining, setIsJoining] = useState(false);
   const [error, setError] = useState("");
 
   const [entryId, setEntryId] = useState<string | null>(() => {
@@ -114,7 +114,7 @@ export default function JoinQueueForm({
     }
 
     try {
-      setLoading(true);
+      setIsJoining(true);
 
       const response = await fetch(`/api/queues/${queueId}/join`, {
         method: "POST",
@@ -144,7 +144,7 @@ export default function JoinQueueForm({
       console.error("Join queue error:", error);
       setError("Something went wrong. Please try again.");
     } finally {
-      setLoading(false);
+      setIsJoining(false);
     }
   }
 
@@ -308,10 +308,10 @@ export default function JoinQueueForm({
 
       <button
         type="submit"
-        disabled={loading}
+        disabled={isJoining}
         className="w-full rounded-full bg-black px-6 py-3 font-medium text-white transition hover:bg-zinc-800 disabled:cursor-not-allowed disabled:opacity-50"
       >
-        {loading ? "Joining..." : "Join Queue"}
+        {isJoining ? "Joining..." : "Join Queue"}
       </button>
     </form>
   );

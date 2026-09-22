@@ -1,4 +1,5 @@
 import Link from "next/link";
+import JoinQueueButton from "@/components/landing/JoinQueueButton";
 
 interface HeroProps {
   isAuthenticated: boolean;
@@ -39,12 +40,7 @@ export default function Hero({ isAuthenticated, hasBusiness }: HeroProps) {
               Create a queue
             </Link>
 
-            <button
-              type="button"
-              className="inline-flex items-center justify-center rounded-qzen-md border border-qzen-border-strong bg-qzen-surface px-6 py-3.5 text-sm font-semibold text-qzen-text hover:border-qzen-brand hover:text-qzen-brand-strong"
-            >
-              Join a queue
-            </button>
+            <JoinQueueButton />
           </div>
 
           <p className="mt-5 text-sm text-qzen-text-subtle">

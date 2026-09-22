@@ -11,12 +11,23 @@ export default function QueueControls({
   queueId,
   queueStatus,
 }: QueueControlsProps) {
-  const [loading, setLoading] = useState(false);
+  type LoadingAction =
+    | "call-next"
+    | "complete"
+    | "skip"
+    | "pause"
+    | "resume"
+    | "reopen"
+    | "close";
+
+  const [loadingAction, setLoadingAction] = useState<LoadingAction | null>(
+    null,
+  );
   const [message, setMessage] = useState("");
 
   async function callNext() {
     try {
-      setLoading(true);
+      setLoadingAction("call-next");
       setMessage("");
 
       const response = await fetch(`/api/queues/${queueId}/call-next`, {
@@ -35,13 +46,13 @@ export default function QueueControls({
       console.error(error);
       setMessage("Something went wrong");
     } finally {
-      setLoading(false);
+      setLoadingAction(null);
     }
   }
 
   async function completeCurrent() {
     try {
-      setLoading(true);
+      setLoadingAction("complete");
       setMessage("");
 
       const response = await fetch(`/api/queues/${queueId}/complete`, {
@@ -60,13 +71,13 @@ export default function QueueControls({
       console.error(error);
       setMessage("Something went wrong");
     } finally {
-      setLoading(false);
+      setLoadingAction(null);
     }
   }
 
   async function skipCurrent() {
     try {
-      setLoading(true);
+      setLoadingAction("skip");
       setMessage("");
 
       const response = await fetch(`/api/queues/${queueId}/skip`, {
@@ -85,7 +96,7 @@ export default function QueueControls({
       console.error(error);
       setMessage("Something went wrong");
     } finally {
-      setLoading(false);
+      setLoadingAction(null);
     }
   }
 
@@ -101,7 +112,16 @@ export default function QueueControls({
     }
 
     try {
-      setLoading(true);
+      const action =
+        status === "paused"
+          ? "pause"
+          : status === "closed"
+            ? "close"
+            : queueStatus === "closed"
+              ? "reopen"
+              : "resume";
+
+      setLoadingAction(action);
       setMessage("");
 
       const response = await fetch(`/api/queues/${queueId}/status`, {
@@ -131,7 +151,7 @@ export default function QueueControls({
       console.error(error);
       setMessage("Something went wrong");
     } finally {
-      setLoading(false);
+      setLoadingAction(null);
     }
   }
 
@@ -140,61 +160,61 @@ export default function QueueControls({
       <div className="flex gap-4">
         <button
           onClick={callNext}
-          disabled={loading || queueStatus === "closed"}
+          disabled={loadingAction !== null || queueStatus === "closed"}
           className="rounded-full bg-black px-6 py-3 font-medium text-white transition hover:bg-zinc-800 disabled:cursor-not-allowed disabled:opacity-50"
         >
-          {loading ? "Processing..." : "Call Next"}
+          {loadingAction === "call-next" ? "Calling..." : "Call Next"}{" "}
         </button>
 
         <button
           onClick={completeCurrent}
-          disabled={loading}
+          disabled={loadingAction !== null}
           className="rounded-full border border-zinc-300 px-6 py-3 font-medium text-zinc-900 transition hover:bg-zinc-100 disabled:cursor-not-allowed disabled:opacity-50"
         >
-          Complete
+          {loadingAction === "complete" ? "Completing..." : "Complete"}
         </button>
         <button
           onClick={skipCurrent}
-          disabled={loading}
+          disabled={loadingAction !== null}
           className="rounded-full border border-orange-300 px-6 py-3 font-medium text-orange-600 transition hover:bg-orange-50 disabled:cursor-not-allowed disabled:opacity-50"
         >
-          Skip
+          {loadingAction === "skip" ? "Skipping..." : "Skip"}
         </button>
       </div>
       <div className="mt-4 flex gap-4">
         {queueStatus === "active" ? (
           <button
             onClick={() => updateQueueStatus("paused")}
-            disabled={loading}
+            disabled={loadingAction !== null}
             className="rounded-full border border-zinc-300 px-6 py-3 font-medium text-zinc-900 transition hover:bg-zinc-100 disabled:cursor-not-allowed disabled:opacity-50"
           >
-            Pause Queue
+            {loadingAction === "pause" ? "Pausing..." : "Pause Queue"}{" "}
           </button>
         ) : queueStatus === "paused" ? (
           <button
             onClick={() => updateQueueStatus("active")}
-            disabled={loading}
+            disabled={loadingAction !== null}
             className="rounded-full bg-black px-6 py-3 font-medium text-white transition hover:bg-zinc-800 disabled:cursor-not-allowed disabled:opacity-50"
           >
-            Resume Queue
+            {loadingAction === "resume" ? "Resuming..." : "Resume Queue"}{" "}
           </button>
         ) : (
           <button
             onClick={() => updateQueueStatus("active")}
-            disabled={loading}
+            disabled={loadingAction !== null}
             className="rounded-full bg-black px-6 py-3 font-medium text-white transition hover:bg-zinc-800 disabled:cursor-not-allowed disabled:opacity-50"
           >
-            Reopen Queue
+            {loadingAction === "reopen" ? "Reopening..." : "Reopen Queue"}{" "}
           </button>
         )}
 
         {queueStatus !== "closed" && (
           <button
             onClick={() => updateQueueStatus("closed")}
-            disabled={loading}
+            disabled={loadingAction !== null}
             className="rounded-full border border-red-300 px-6 py-3 font-medium text-red-600 transition hover:bg-red-50 disabled:cursor-not-allowed disabled:opacity-50"
           >
-            Close Queue
+            {loadingAction === "close" ? "Closing..." : "Close Queue"}{" "}
           </button>
         )}
       </div>

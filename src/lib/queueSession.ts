@@ -3,7 +3,10 @@ import Business from "@/models/Business";
 import Queue from "@/models/Queue";
 import QueueSession from "@/models/QueueSession";
 
-function getDateKey(timezone: string) {
+export function getDateKey(
+  timezone: string,
+  date: Date = new Date(),
+) {
   const formatter = new Intl.DateTimeFormat("en-CA", {
     timeZone: timezone,
     year: "numeric",
@@ -11,7 +14,7 @@ function getDateKey(timezone: string) {
     day: "2-digit",
   });
 
-  return formatter.format(new Date());
+  return formatter.format(date);
 }
 
 export async function getOrCreateQueueSession(queueId: string) {
@@ -60,6 +63,32 @@ export async function getOrCreateQueueSession(queueId: string) {
       currentToken: 0,
     });
   }
+
+  return session;
+}
+
+export async function getQueueSessionForDate(
+  queueId: string,
+  dateKey: string,
+) {
+  await connectDB();
+
+  const queue = await Queue.findById(queueId);
+
+  if (!queue) {
+    return null;
+  }
+
+  const business = await Business.findById(queue.businessId);
+
+  if (!business) {
+    return null;
+  }
+
+  const session = await QueueSession.findOne({
+    queueId,
+    dateKey,
+  });
 
   return session;
 }
