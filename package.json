@@ -2,15 +2,16 @@
   "name": "qzen",
   "version": "0.1.0",
   "private": true,
-   "type": "module",
+  "type": "module",
   "scripts": {
     "dev": "node server.ts",
     "build": "next build",
-    "start": "NODE_ENV=production node server.ts",
+    "start": "cross-env NODE_ENV=production node server.ts",
     "lint": "eslint"
   },
   "dependencies": {
     "better-auth": "^1.7.3",
+    "cross-env": "^10.1.0",
     "mongodb": "^7.6.0",
     "mongoose": "^9.9.5",
     "next": "16.3.4",
