@@ -1,9 +1,7 @@
-/* eslint-disable @typescript-eslint/no-require-imports */
-
-const { createServer } = require("node:http");
-const { parse } = require("node:url");
-const next = require("next");
-const { Server } = require("socket.io");
+import { createServer } from "node:http";
+import { parse } from "node:url";
+import next from "next";
+import { Server } from "socket.io";
 
 const dev = process.env.NODE_ENV !== "production";
 const hostname = "localhost";
@@ -19,14 +17,13 @@ const handle = app.getRequestHandler();
 
 app.prepare().then(() => {
   const httpServer = createServer((req, res) => {
-    const parsedUrl = parse(req.url, true);
-
+    const parsedUrl = parse(req.url ?? "/", true);
     handle(req, res, parsedUrl);
   });
 
   const io = new Server(httpServer);
 
-  global.io = io;
+  globalThis.io = io;
 
   io.on("connection", (socket) => {
     console.log("Socket connected:", socket.id);
@@ -34,9 +31,7 @@ app.prepare().then(() => {
     socket.on("joinQueue", (queueId) => {
       socket.join(`queue:${queueId}`);
 
-      console.log(
-        `Socket ${socket.id} joined queue ${queueId}`
-      );
+      console.log(`Socket ${socket.id} joined queue ${queueId}`);
     });
 
     socket.on("disconnect", () => {
@@ -45,8 +40,6 @@ app.prepare().then(() => {
   });
 
   httpServer.listen(port, () => {
-    console.log(
-      `> Qzen ready on http://${hostname}:${port}`
-    );
+    console.log(`> Qzen ready on http://${hostname}:${port}`);
   });
 });
