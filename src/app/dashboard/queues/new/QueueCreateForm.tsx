@@ -53,16 +53,16 @@ export default function QueueCreateForm() {
   }
 
   return (
-    <main className="relative flex min-h-screen overflow-hidden bg-qzen-surface-muted px-5 py-6 sm:px-8 sm:py-8">
+    <main className="relative flex min-h-screen overflow-hidden px-5 py-6 sm:px-8 sm:py-8">
       {/* Background atmosphere */}
       <div
         aria-hidden="true"
-        className="pointer-events-none absolute -right-40 -top-40 h-96 w-96 rounded-full bg-emerald-100/50 blur-3xl"
+        className="pointer-events-none absolute -right-40 -top-40 h-96 w-96 rounded-full bg-emerald-500/15 blur-3xl"
       />
 
       <div
         aria-hidden="true"
-        className="pointer-events-none absolute -bottom-48 -left-40 h-96 w-96 rounded-full bg-emerald-50 blur-3xl"
+        className="pointer-events-none absolute -bottom-48 -left-40 h-96 w-96 rounded-full bg-qz-accent-soft blur-3xl"
       />
 
       <div className="relative mx-auto flex w-full max-w-7xl flex-1 flex-col">
@@ -82,33 +82,33 @@ export default function QueueCreateForm() {
           <section className="w-full max-w-xl -translate-y-2 sm:-translate-y-4">
             {/* Intro */}
             <div className="text-center">
-              <div className="mx-auto inline-flex items-center gap-2 rounded-full border border-qzen-border bg-qzen-surface px-3 py-1.5 text-xs font-semibold uppercase tracking-[0.16em] text-qzen-brand-strong">
-                <span className="h-1.5 w-1.5 rounded-full bg-qzen-accent" />
+              <div className="mx-auto inline-flex items-center gap-2 rounded-full border border-qz-line bg-qz-surface px-3 py-1.5 text-xs font-semibold uppercase tracking-[0.16em] text-emerald-300">
+                <span className="h-1.5 w-1.5 rounded-full bg-qz-accent" />
                 New queue
               </div>
 
-              <h1 className="mt-6 text-4xl font-bold tracking-[-0.05em] text-qzen-text sm:text-5xl">
+              <h1 className="mt-6 text-4xl font-bold tracking-[-0.05em] text-white sm:text-5xl">
                 Create a new queue
               </h1>
 
-              <p className="mx-auto mt-4 max-w-md text-base leading-7 text-qzen-text-secondary sm:text-lg">
+              <p className="mx-auto mt-4 max-w-md text-base leading-7 text-qz-text-2 sm:text-lg">
                 Add another queue to your business and start managing customers
                 with Qzen.
               </p>
             </div>
 
             {/* Form card */}
-            <div className="mt-10 rounded-qzen-xl border border-qzen-border bg-qzen-surface p-6 shadow-qzen-lg sm:p-8">
+            <div className="mt-10 rounded-3xl border border-qz-line bg-qz-surface p-6 sm:p-8">
               <form onSubmit={handleSubmit} className="space-y-6">
                 <div>
                   <label
                     htmlFor="queueName"
-                    className="text-sm font-semibold text-qzen-text"
+                    className="text-sm font-semibold text-qz-text"
                   >
                     Queue name
                   </label>
 
-                  <p className="mt-1 text-sm text-qzen-text-subtle">
+                  <p className="mt-1 text-sm text-qz-text-3">
                     This is what customers will see when they join.
                   </p>
 
@@ -120,14 +120,14 @@ export default function QueueCreateForm() {
                     required
                     autoComplete="off"
                     placeholder="e.g. General Consultation"
-                    className="mt-3 w-full rounded-qzen-md border border-qzen-border-strong bg-qzen-surface px-4 py-3.5 text-qzen-text outline-none transition placeholder:text-qzen-text-subtle focus:border-qzen-brand focus:ring-2 focus:ring-qzen-brand/10"
+                    className="mt-3 w-full rounded-xl border border-qz-line-strong bg-qz-surface-2 px-4 py-3.5 text-qz-text outline-none transition placeholder:text-qz-text-3 focus:border-qz-accent focus:ring-2 focus:ring-emerald-500/30"
                   />
                 </div>
 
                 {error && (
                   <div
                     role="alert"
-                    className="rounded-qzen-md border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700"
+                    className="rounded-qzen-md border border-red-500/30 bg-red-500/12 px-4 py-3 text-sm text-red-400"
                   >
                     {error}
                   </div>
@@ -136,7 +136,7 @@ export default function QueueCreateForm() {
                 <button
                   type="submit"
                   disabled={isCreating}
-                  className="flex w-full items-center justify-center gap-2 rounded-qzen-md bg-qzen-brand px-6 py-3.5 text-sm font-semibold text-white shadow-qzen-sm transition hover:bg-qzen-brand-strong focus:outline-none focus-visible:ring-2 focus-visible:ring-qzen-brand focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+                  className="flex w-full cursor-pointer items-center justify-center gap-2 rounded-xl bg-qz-accent px-6 py-3.5 text-sm font-semibold text-qz-accent-ink transition hover:bg-qz-accent-strong focus:outline-none focus-visible:ring-2 focus-visible:ring-emerald-500/60 disabled:cursor-not-allowed disabled:opacity-50"
                 >
                   {isCreating ? "Creating queue..." : "Create queue"}
 
@@ -144,7 +144,7 @@ export default function QueueCreateForm() {
                 </button>
               </form>
 
-              <p className="mt-5 text-center text-xs leading-5 text-qzen-text-subtle">
+              <p className="mt-5 text-center text-xs leading-5 text-qz-text-3">
                 You can create more queues whenever you need.
               </p>
             </div>

@@ -39,7 +39,7 @@ export default function DateFilter({
         value={selectedDate}
         max={todayDateKey}
         onChange={handleChange}
-        className="h-10 rounded-xl border border-zinc-200 bg-white px-3 text-sm text-zinc-700 outline-none transition focus:border-zinc-400 focus:ring-2 focus:ring-zinc-200"
+        className="h-10 rounded-xl border border-qz-line-strong bg-qz-surface-2 px-3 text-sm text-qz-text-2 outline-none transition focus:border-qz-accent focus:ring-2 focus:ring-emerald-500/30"
       />
     </div>
   );

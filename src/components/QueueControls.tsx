@@ -161,7 +161,7 @@ export default function QueueControls({
         <button
           onClick={callNext}
           disabled={loadingAction !== null || queueStatus === "closed"}
-          className="rounded-full bg-black px-6 py-3 font-medium text-white transition hover:bg-zinc-800 disabled:cursor-not-allowed disabled:opacity-50"
+          className="rounded-full bg-qz-accent px-6 py-3 font-semibold text-qz-accent-ink transition hover:bg-qz-accent-strong disabled:cursor-not-allowed disabled:opacity-50"
         >
           {loadingAction === "call-next" ? "Calling..." : "Call Next"}{" "}
         </button>
@@ -169,7 +169,7 @@ export default function QueueControls({
         <button
           onClick={completeCurrent}
           disabled={loadingAction !== null}
-          className="rounded-full border border-zinc-300 px-6 py-3 font-medium text-zinc-900 transition hover:bg-zinc-100 disabled:cursor-not-allowed disabled:opacity-50"
+          className="rounded-full border border-qz-line-strong px-6 py-3 font-medium text-qz-text transition hover:bg-white/10 disabled:cursor-not-allowed disabled:opacity-50"
         >
           {loadingAction === "complete" ? "Completing..." : "Complete"}
         </button>
@@ -186,7 +186,7 @@ export default function QueueControls({
           <button
             onClick={() => updateQueueStatus("paused")}
             disabled={loadingAction !== null}
-            className="rounded-full border border-zinc-300 px-6 py-3 font-medium text-zinc-900 transition hover:bg-zinc-100 disabled:cursor-not-allowed disabled:opacity-50"
+            className="rounded-full border border-qz-line-strong px-6 py-3 font-medium text-qz-text transition hover:bg-white/10 disabled:cursor-not-allowed disabled:opacity-50"
           >
             {loadingAction === "pause" ? "Pausing..." : "Pause Queue"}{" "}
           </button>
@@ -194,7 +194,7 @@ export default function QueueControls({
           <button
             onClick={() => updateQueueStatus("active")}
             disabled={loadingAction !== null}
-            className="rounded-full bg-black px-6 py-3 font-medium text-white transition hover:bg-zinc-800 disabled:cursor-not-allowed disabled:opacity-50"
+            className="rounded-full bg-qz-accent px-6 py-3 font-semibold text-qz-accent-ink transition hover:bg-qz-accent-strong disabled:cursor-not-allowed disabled:opacity-50"
           >
             {loadingAction === "resume" ? "Resuming..." : "Resume Queue"}{" "}
           </button>
@@ -202,7 +202,7 @@ export default function QueueControls({
           <button
             onClick={() => updateQueueStatus("active")}
             disabled={loadingAction !== null}
-            className="rounded-full bg-black px-6 py-3 font-medium text-white transition hover:bg-zinc-800 disabled:cursor-not-allowed disabled:opacity-50"
+            className="rounded-full bg-qz-accent px-6 py-3 font-semibold text-qz-accent-ink transition hover:bg-qz-accent-strong disabled:cursor-not-allowed disabled:opacity-50"
           >
             {loadingAction === "reopen" ? "Reopening..." : "Reopen Queue"}{" "}
           </button>
@@ -212,14 +212,14 @@ export default function QueueControls({
           <button
             onClick={() => updateQueueStatus("closed")}
             disabled={loadingAction !== null}
-            className="rounded-full border border-red-300 px-6 py-3 font-medium text-red-600 transition hover:bg-red-50 disabled:cursor-not-allowed disabled:opacity-50"
+            className="rounded-full border border-red-500/40 px-6 py-3 font-medium text-red-400 transition hover:bg-red-500/20 disabled:cursor-not-allowed disabled:opacity-50"
           >
             {loadingAction === "close" ? "Closing..." : "Close Queue"}{" "}
           </button>
         )}
       </div>
 
-      {message && <p className="mt-4 text-sm text-zinc-600">{message}</p>}
+      {message && <p className="mt-4 text-sm text-qz-text-2">{message}</p>}
     </div>
   );
 }

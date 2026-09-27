@@ -53,14 +53,14 @@ function formatDuration(milliseconds: number) {
 
 function getStatusClasses(status: string) {
   if (status === "active") {
-    return "bg-emerald-50 text-emerald-700";
+    return "bg-qz-accent-soft text-emerald-300 ring-1 ring-inset ring-emerald-500/25";
   }
 
   if (status === "paused") {
-    return "bg-amber-50 text-amber-700";
+    return "bg-amber-500/12 text-amber-400 ring-1 ring-inset ring-amber-500/25";
   }
 
-  return "bg-zinc-100 text-zinc-600";
+  return "bg-white/[0.08] text-qz-text-2 ring-1 ring-inset ring-white/10";
 }
 
 function getStatusLabel(status: string) {
@@ -240,16 +240,16 @@ export default async function AnalyticsPage({
   ).length;
 
   return (
-    <section className="p-6 sm:p-8 lg:p-10">
+    <section className="mx-auto max-w-[1500px] px-5 py-6 sm:px-8 sm:py-8 lg:px-10">
       {/* Page Header */}
       <header>
         <div className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
           <div>
-            <h1 className="text-3xl font-semibold tracking-tight text-zinc-950">
+            <h1 className="text-3xl font-semibold tracking-[-0.03em] text-white">
               Analytics
             </h1>
 
-            <p className="mt-2 text-sm text-zinc-500">
+            <p className="mt-2 text-sm text-qz-text-2">
               Understand how your queues are performing.
             </p>
           </div>
@@ -266,8 +266,8 @@ export default async function AnalyticsPage({
             href="/dashboard/analytics"
             className={`rounded-full px-3 py-1.5 text-xs font-medium transition ${
               isToday
-                ? "bg-zinc-950 text-white"
-                : "bg-zinc-100 text-zinc-600 hover:bg-zinc-200"
+                ? "bg-qz-accent text-qz-accent-ink"
+                : "bg-white/[0.08] text-qz-text-2 hover:bg-white/10"
             }`}
           >
             Today
@@ -277,67 +277,67 @@ export default async function AnalyticsPage({
             href={`/dashboard/analytics?date=${yesterdayDateKey}`}
             className={`rounded-full px-3 py-1.5 text-xs font-medium transition ${
               !isToday && selectedDate === yesterdayDateKey
-                ? "bg-zinc-950 text-white"
-                : "bg-zinc-100 text-zinc-600 hover:bg-zinc-200"
+                ? "bg-qz-accent text-qz-accent-ink"
+                : "bg-white/[0.08] text-qz-text-2 hover:bg-white/10"
             }`}
           >
             Yesterday
           </a>
 
-          <span className="text-xs text-zinc-400">Showing {formattedDate}</span>
+          <span className="text-xs text-qz-text-3">Showing {formattedDate}</span>
         </div>
 
-        <p className="mt-4 text-xs font-medium text-zinc-400">
+        <p className="mt-4 text-xs font-medium text-qz-text-3">
           {isToday
-            ? "Today&apos;s queue activity"
+            ? "Today's queue activity"
             : `Queue activity from ${formattedDate}`}
         </p>
       </header>
 
       {/* Overview */}
       <section className="mt-8 grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
-        <div className="rounded-2xl border border-zinc-200 bg-white p-5 shadow-sm">
-          <p className="text-xs font-medium text-zinc-500">Total Customers</p>
+        <div className="rounded-2xl border border-qz-line bg-qz-surface p-5">
+          <p className="text-xs font-medium text-qz-text-2">Total Customers</p>
 
-          <p className="mt-2 text-3xl font-semibold tracking-tight text-zinc-950">
+          <p className="mt-2 text-3xl font-semibold tracking-[-0.03em] text-white">
             {totalCustomers}
           </p>
 
-          <p className="mt-1 text-xs text-zinc-400">
+          <p className="mt-1 text-xs text-qz-text-3">
             {isToday ? "Customers who joined today" : "Customers who joined"}
           </p>
         </div>
 
-        <div className="rounded-2xl border border-zinc-200 bg-white p-5 shadow-sm">
-          <p className="text-xs font-medium text-zinc-500">Completed</p>
+        <div className="rounded-2xl border border-qz-line bg-qz-surface p-5">
+          <p className="text-xs font-medium text-qz-text-2">Completed</p>
 
-          <p className="mt-2 text-3xl font-semibold tracking-tight text-emerald-600">
+          <p className="mt-2 text-3xl font-semibold tracking-tight text-emerald-400">
             {completedCustomers}
           </p>
 
-          <p className="mt-1 text-xs text-zinc-400">Successfully served</p>
+          <p className="mt-1 text-xs text-qz-text-3">Successfully served</p>
         </div>
 
-        <div className="rounded-2xl border border-zinc-200 bg-white p-5 shadow-sm">
-          <p className="text-xs font-medium text-zinc-500">Skipped</p>
-          <p className="mt-2 text-3xl font-semibold tracking-tight text-red-600">
+        <div className="rounded-2xl border border-qz-line bg-qz-surface p-5">
+          <p className="text-xs font-medium text-qz-text-2">Skipped</p>
+          <p className="mt-2 text-3xl font-semibold tracking-tight text-red-400">
             {skippedCustomers}
           </p>
-          <p className="mt-1 text-xs text-zinc-400">
+          <p className="mt-1 text-xs text-qz-text-3">
             {isToday ? "Customers skipped today" : "Customers skipped"}
           </p>{" "}
         </div>
 
-        <div className="rounded-2xl border border-zinc-200 bg-white p-5 shadow-sm">
-          <p className="text-xs font-medium text-zinc-500">
+        <div className="rounded-2xl border border-qz-line bg-qz-surface p-5">
+          <p className="text-xs font-medium text-qz-text-2">
             {isToday ? "Currently Waiting" : "Waiting"}
           </p>
 
-          <p className="mt-2 text-3xl font-semibold tracking-tight text-amber-600">
+          <p className="mt-2 text-3xl font-semibold tracking-tight text-amber-400">
             {waitingCustomers}
           </p>
 
-          <p className="mt-1 text-xs text-zinc-400">
+          <p className="mt-1 text-xs text-qz-text-3">
             {isToday ? "Customers waiting now" : "Customers who were waiting"}
           </p>
         </div>
@@ -345,13 +345,13 @@ export default async function AnalyticsPage({
 
       {/* Activity + Service Time */}
       <section className="mt-6 grid gap-6 xl:grid-cols-[minmax(0,1.6fr)_minmax(280px,0.7fr)]">
-        <div className="rounded-2xl border border-zinc-200 bg-white p-5 shadow-sm sm:p-6">
+        <div className="rounded-2xl border border-qz-line bg-qz-surface p-5 sm:p-6">
           <div>
-            <h2 className="text-lg font-semibold text-zinc-950">
+            <h2 className="text-lg font-semibold text-qz-text">
               Customer Activity
             </h2>
 
-            <p className="mt-1 text-sm text-zinc-500">
+            <p className="mt-1 text-sm text-qz-text-2">
               {isToday
                 ? "Customers joined and served throughout the day."
                 : "Customers joined and served on this date."}
@@ -363,22 +363,22 @@ export default async function AnalyticsPage({
           </div>
         </div>
 
-        <div className="rounded-2xl border border-zinc-200 bg-white p-6 shadow-sm">
-          <p className="text-sm font-medium text-zinc-500">
+        <div className="rounded-2xl border border-qz-line bg-qz-surface p-6">
+          <p className="text-sm font-medium text-qz-text-2">
             Average Service Time
           </p>
 
-          <p className="mt-3 text-4xl font-semibold tracking-tight text-zinc-950">
+          <p className="mt-3 text-4xl font-semibold tracking-tight text-qz-text">
             {averageServiceTime > 0 ? formatDuration(averageServiceTime) : "—"}
           </p>
 
-          <p className="mt-2 text-sm text-zinc-500">
+          <p className="mt-2 text-sm text-qz-text-2">
             Based on completed customers with recorded call and completion
             times.
           </p>
 
-          <div className="mt-6 border-t border-zinc-100 pt-5">
-            <p className="text-xs text-zinc-400">
+          <div className="mt-6 border-t border-qz-line pt-5">
+            <p className="text-xs text-qz-text-3">
               {completedEntries.length} completed{" "}
               {completedEntries.length === 1 ? "customer" : "customers"}{" "}
               included
@@ -388,13 +388,13 @@ export default async function AnalyticsPage({
       </section>
 
       {/* Queue Performance */}
-      <section className="mt-6 rounded-2xl border border-zinc-200 bg-white shadow-sm">
-        <div className="border-b border-zinc-100 p-5 sm:p-6">
-          <h2 className="text-lg font-semibold text-zinc-950">
+      <section className="mt-6 rounded-2xl border border-qz-line bg-qz-surface">
+        <div className="border-b border-qz-line p-5 sm:p-6">
+          <h2 className="text-lg font-semibold text-qz-text">
             Queue Performance
           </h2>
 
-          <p className="mt-1 text-sm text-zinc-500">
+          <p className="mt-1 text-sm text-qz-text-2">
             {isToday
               ? "Compare customer activity across your queues today."
               : "Compare customer activity across your queues on this date."}
@@ -403,11 +403,11 @@ export default async function AnalyticsPage({
 
         {queueAnalytics.length === 0 ? (
           <div className="p-10 text-center">
-            <h3 className="text-sm font-semibold text-zinc-900">
+            <h3 className="text-sm font-semibold text-qz-text">
               No queues yet
             </h3>
 
-            <p className="mt-1 text-sm text-zinc-500">
+            <p className="mt-1 text-sm text-qz-text-2">
               Create a queue to start collecting analytics.
             </p>
           </div>
@@ -415,8 +415,8 @@ export default async function AnalyticsPage({
           <>
             <div className="hidden overflow-x-auto md:block">
               <table className="w-full text-left">
-                <thead className="border-b border-zinc-100 bg-zinc-50/70">
-                  <tr className="text-xs font-medium text-zinc-500">
+                <thead className="border-b border-qz-line bg-white/[0.04]">
+                  <tr className="text-xs font-medium text-qz-text-2">
                     <th className="px-5 py-3">Queue</th>
                     <th className="px-5 py-3">Customers</th>
                     <th className="px-5 py-3">Completed</th>
@@ -426,7 +426,7 @@ export default async function AnalyticsPage({
                   </tr>
                 </thead>
 
-                <tbody className="divide-y divide-zinc-100">
+                <tbody className="divide-y divide-qz-line">
                   {queueAnalytics.map(
                     ({
                       queue,
@@ -437,21 +437,21 @@ export default async function AnalyticsPage({
                       sessionStatus,
                     }) => (
                       <tr key={queue._id.toString()} className="text-sm">
-                        <td className="px-5 py-4 font-medium text-zinc-900">
+                        <td className="px-5 py-4 font-medium text-qz-text">
                           {queue.name}
                         </td>
 
-                        <td className="px-5 py-4 text-zinc-700">
+                        <td className="px-5 py-4 text-qz-text-2">
                           {entries.length}
                         </td>
 
-                        <td className="px-5 py-4 text-emerald-600">
+                        <td className="px-5 py-4 text-emerald-400">
                           {completed}
                         </td>
 
-                        <td className="px-5 py-4 text-red-600">{skipped}</td>
+                        <td className="px-5 py-4 text-red-400">{skipped}</td>
 
-                        <td className="px-5 py-4 text-amber-600">{waiting}</td>
+                        <td className="px-5 py-4 text-amber-400">{waiting}</td>
 
                         <td className="px-5 py-4">
                           <span
@@ -469,7 +469,7 @@ export default async function AnalyticsPage({
               </table>
             </div>
 
-            <div className="divide-y divide-zinc-100 md:hidden">
+            <div className="divide-y divide-qz-line md:hidden">
               {queueAnalytics.map(
                 ({
                   queue,
@@ -481,7 +481,7 @@ export default async function AnalyticsPage({
                 }) => (
                   <div key={queue._id.toString()} className="p-5">
                     <div className="flex items-center justify-between gap-4">
-                      <h3 className="font-medium text-zinc-900">
+                      <h3 className="font-medium text-qz-text">
                         {queue.name}
                       </h3>
 
@@ -496,29 +496,29 @@ export default async function AnalyticsPage({
 
                     <div className="mt-4 grid grid-cols-2 gap-4 text-xs sm:grid-cols-4">
                       <div>
-                        <p className="text-zinc-400">Customers</p>
-                        <p className="mt-1 font-medium text-zinc-700">
+                        <p className="text-qz-text-3">Customers</p>
+                        <p className="mt-1 font-medium text-qz-text-2">
                           {entries.length}
                         </p>
                       </div>
 
                       <div>
-                        <p className="text-zinc-400">Completed</p>
-                        <p className="mt-1 font-medium text-emerald-600">
+                        <p className="text-qz-text-3">Completed</p>
+                        <p className="mt-1 font-medium text-emerald-400">
                           {completed}
                         </p>
                       </div>
 
                       <div>
-                        <p className="text-zinc-400">Skipped</p>
-                        <p className="mt-1 font-medium text-red-600">
+                        <p className="text-qz-text-3">Skipped</p>
+                        <p className="mt-1 font-medium text-red-400">
                           {skipped}
                         </p>
                       </div>
 
                       <div>
-                        <p className="text-zinc-400">Waiting</p>
-                        <p className="mt-1 font-medium text-amber-600">
+                        <p className="text-qz-text-3">Waiting</p>
+                        <p className="mt-1 font-medium text-amber-400">
                           {waiting}
                         </p>
                       </div>

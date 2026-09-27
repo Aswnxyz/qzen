@@ -19,11 +19,24 @@ type ActiveQueuesProps = {
   queues: QueueItem[];
 };
 
-function QueueStatusIcon() {
+function QueueIcon() {
   return (
-    <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-emerald-50 text-emerald-600">
-      <span className="h-2.5 w-2.5 rounded-full bg-emerald-500" />
-    </div>
+    <svg
+      width="18"
+      height="18"
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="1.8"
+      aria-hidden="true"
+    >
+      <circle cx="6" cy="6" r="2" />
+      <circle cx="18" cy="6" r="2" />
+      <circle cx="6" cy="18" r="2" />
+      <path d="M8 6h6a4 4 0 0 1 4 4v0" />
+      <path d="M6 8v8" />
+      <path d="M8 18h6a4 4 0 0 0 4-4v0" />
+    </svg>
   );
 }
 
@@ -33,30 +46,36 @@ export default function ActiveQueues({ queues }: ActiveQueuesProps) {
   );
 
   return (
-    <section className="rounded-2xl border border-zinc-200 bg-white p-6 shadow-sm">
-      <div className="flex items-center justify-between">
-        <div>
-          <h2 className="text-lg font-semibold text-zinc-900">
-            Active Queues
-          </h2>
+    <section className="rounded-3xl border border-qz-line bg-qz-surface p-5 sm:p-6">
+      <div className="flex items-center justify-between gap-4">
+        <div className="flex items-start gap-3">
+          <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-qz-accent-soft text-emerald-300 ring-1 ring-inset ring-emerald-500/25">
+            <QueueIcon />
+          </span>
 
-          <p className="mt-1 text-sm text-zinc-500">
-            What&apos;s happening right now.
-          </p>
+          <div>
+            <h2 className="text-base font-semibold tracking-tight text-qz-text">
+              Active Queues
+            </h2>
+
+            <p className="mt-1 text-sm text-qz-text-3">
+              What&apos;s happening right now.
+            </p>
+          </div>
         </div>
 
-        <span className="rounded-full bg-emerald-50 px-3 py-1 text-xs font-medium text-emerald-700">
+        <span className="shrink-0 rounded-full bg-qz-accent-soft px-3 py-1 text-xs font-semibold text-emerald-300 ring-1 ring-inset ring-emerald-500/25 tabular-nums">
           {activeQueues.length} active
         </span>
       </div>
 
       {activeQueues.length === 0 ? (
-        <div className="mt-6 rounded-xl border border-dashed border-zinc-200 bg-zinc-50 p-6 text-center">
-          <p className="text-sm font-medium text-zinc-700">
+        <div className="mt-5 rounded-2xl border border-dashed border-qz-line-strong bg-white/[0.02] p-6 text-center">
+          <p className="text-sm font-medium text-qz-text-2">
             No active queues
           </p>
 
-          <p className="mt-1 text-xs text-zinc-500">
+          <p className="mt-1 text-xs text-qz-text-3">
             Your active queues will appear here.
           </p>
         </div>
@@ -65,62 +84,53 @@ export default function ActiveQueues({ queues }: ActiveQueuesProps) {
           {activeQueues.map((item) => (
             <div
               key={item.queue._id}
-              className="rounded-xl border border-zinc-100 bg-zinc-50/60 p-4"
+              className="rounded-2xl border border-qz-line bg-qz-surface-2/70 px-4 py-4 transition hover:border-qz-line-strong hover:bg-qz-surface-2"
             >
-              <div className="flex items-start gap-3">
-                <QueueStatusIcon />
+              <div className="flex items-center gap-3">
+                <span
+                  aria-hidden="true"
+                  className="h-2 w-2 shrink-0 rounded-full bg-qz-accent shadow-[0_0_10px_rgba(16,185,129,0.9)]"
+                />
 
-                <div className="min-w-0 flex-1">
-                  <div className="flex items-start justify-between gap-3">
-                    <div className="min-w-0">
-                      <p className="truncate text-sm font-semibold text-zinc-900">
-                        {item.queue.name}
-                      </p>
+                <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-qz-accent-soft text-emerald-300 ring-1 ring-inset ring-emerald-500/25">
+                  <QueueIcon />
+                </span>
 
-                      <div className="mt-1 flex items-center gap-1.5">
-                        <span className="h-1.5 w-1.5 rounded-full bg-emerald-500" />
+                <p className="min-w-0 flex-1 truncate text-sm font-semibold text-qz-text">
+                  {item.queue.name}
+                </p>
 
-                        <span className="text-xs font-medium text-emerald-700">
-                          Open
-                        </span>
-                      </div>
-                    </div>
+                <Link
+                  href={`/dashboard/queue/${item.queue._id}`}
+                  className="shrink-0 cursor-pointer rounded-lg bg-qz-accent-soft px-3 py-1.5 text-xs font-semibold text-emerald-300 ring-1 ring-inset ring-emerald-500/25 transition hover:bg-emerald-500/25"
+                >
+                  Open Queue →
+                </Link>
+              </div>
 
-                    <Link
-                      href={`/dashboard/queue/${item.queue._id}`}
-                      className="shrink-0 text-xs font-medium text-zinc-600 transition hover:text-zinc-950"
-                    >
-                      Open Queue →
-                    </Link>
-                  </div>
+              <div className="mt-3.5 grid grid-cols-3 gap-3 rounded-xl bg-white/[0.03] px-3 py-2.5">
+                <div>
+                  <p className="text-[11px] text-qz-text-3">Waiting</p>
 
-                  <div className="mt-4 grid grid-cols-3 divide-x divide-zinc-200 rounded-lg border border-zinc-200/80 bg-white">
-                    <div className="px-3 py-2.5">
-                      <p className="text-[11px] text-zinc-500">Waiting</p>
+                  <p className="mt-0.5 text-sm font-semibold tabular-nums text-qz-text">
+                    {item.waiting}
+                  </p>
+                </div>
 
-                      <p className="mt-0.5 text-sm font-semibold text-zinc-900">
-                        {item.waiting}
-                      </p>
-                    </div>
+                <div>
+                  <p className="text-[11px] text-qz-text-3">Serving</p>
 
-                    <div className="px-3 py-2.5">
-                      <p className="text-[11px] text-zinc-500">Serving</p>
+                  <p className="mt-0.5 text-sm font-semibold tabular-nums text-qz-text">
+                    {item.serving ? `#${item.serving.tokenNumber}` : "—"}
+                  </p>
+                </div>
 
-                      <p className="mt-0.5 text-sm font-semibold text-zinc-900">
-                        {item.serving
-                          ? `#${item.serving.tokenNumber}`
-                          : "—"}
-                      </p>
-                    </div>
+                <div>
+                  <p className="text-[11px] text-qz-text-3">Served</p>
 
-                    <div className="px-3 py-2.5">
-                      <p className="text-[11px] text-zinc-500">Served</p>
-
-                      <p className="mt-0.5 text-sm font-semibold text-zinc-900">
-                        {item.servedToday}
-                      </p>
-                    </div>
-                  </div>
+                  <p className="mt-0.5 text-sm font-semibold tabular-nums text-qz-text">
+                    {item.servedToday}
+                  </p>
                 </div>
               </div>
             </div>

@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { createPortal } from "react-dom";
 import { useRouter } from "next/navigation";
 import { authClient } from "@/lib/auth-client";
 
@@ -78,33 +79,36 @@ export default function SignOutButton() {
       <button
         type="button"
         onClick={() => setShowConfirmation(true)}
-        className="flex w-full items-center gap-3 px-3 text-left text-sm font-medium text-zinc-500 transition hover:text-zinc-900"
+        className="flex w-full cursor-pointer items-center gap-3 rounded-xl px-3 py-2 text-left text-sm font-medium text-qz-text-2 transition hover:bg-white/5 hover:text-qz-text"
       >
         <SignOutIcon />
         <span>Sign out</span>
       </button>
 
-      {showConfirmation && (
-        <div
-          className="fixed inset-0 z-50 flex items-center justify-center bg-zinc-950/30 px-4 backdrop-blur-[2px]"
-          role="dialog"
-          aria-modal="true"
-          aria-labelledby="sign-out-title"
-          aria-describedby="sign-out-description"
-        >
-          <div className="w-full max-w-sm rounded-2xl border border-zinc-200 bg-white p-6 shadow-xl">
+      {showConfirmation &&
+        createPortal(
+          <div
+            className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 px-4 backdrop-blur-[2px]"
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby="sign-out-title"
+            aria-describedby="sign-out-description"
+            onPointerDown={(event) => event.stopPropagation()}
+            onMouseDown={(event) => event.stopPropagation()}
+          >
+          <div className="w-full max-w-sm rounded-2xl border border-qz-line-strong bg-qz-surface p-6 shadow-2xl shadow-black/50">
             <div className="flex items-start justify-between gap-4">
               <div>
                 <h2
                   id="sign-out-title"
-                  className="text-base font-semibold text-zinc-950"
+                  className="text-base font-semibold tracking-tight text-qz-text"
                 >
                   Sign out?
                 </h2>
 
                 <p
                   id="sign-out-description"
-                  className="mt-2 text-sm leading-5 text-zinc-500"
+                  className="mt-2 text-sm leading-5 text-qz-text-2"
                 >
                   Are you sure you want to sign out of your Qzen account?
                 </p>
@@ -115,7 +119,7 @@ export default function SignOutButton() {
                 onClick={cancelSignOut}
                 disabled={loading}
                 aria-label="Close"
-                className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg text-zinc-400 transition hover:bg-zinc-100 hover:text-zinc-700 disabled:cursor-not-allowed disabled:opacity-50"
+                className="flex h-8 w-8 shrink-0 cursor-pointer items-center justify-center rounded-lg text-qz-text-3 transition hover:bg-white/10 hover:text-qz-text disabled:cursor-not-allowed disabled:opacity-50"
               >
                 <CloseIcon />
               </button>
@@ -126,7 +130,7 @@ export default function SignOutButton() {
                 type="button"
                 onClick={cancelSignOut}
                 disabled={loading}
-                className="rounded-xl border border-zinc-200 bg-white px-4 py-2.5 text-sm font-medium text-zinc-700 transition hover:border-zinc-300 hover:bg-zinc-50 disabled:cursor-not-allowed disabled:opacity-50"
+                className="cursor-pointer rounded-xl border border-qz-line-strong bg-white/5 px-4 py-2.5 text-sm font-medium text-qz-text-2 transition hover:bg-white/10 hover:text-qz-text disabled:cursor-not-allowed disabled:opacity-50"
               >
                 Cancel
               </button>
@@ -135,13 +139,14 @@ export default function SignOutButton() {
                 type="button"
                 onClick={handleSignOut}
                 disabled={loading}
-                className="rounded-xl bg-zinc-950 px-4 py-2.5 text-sm font-medium text-white transition hover:bg-zinc-800 disabled:cursor-not-allowed disabled:opacity-60"
+                className="cursor-pointer rounded-xl bg-qz-accent px-4 py-2.5 text-sm font-semibold text-qz-accent-ink transition hover:bg-qz-accent-strong disabled:cursor-not-allowed disabled:opacity-60"
               >
                 {loading ? "Signing out..." : "Sign out"}
               </button>
             </div>
           </div>
-        </div>
+        </div>,
+        document.body,
       )}
     </>
   );
