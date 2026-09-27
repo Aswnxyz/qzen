@@ -86,61 +86,61 @@ const cards = [
     label: "Total Customers",
     description: "Customers today",
     icon: CustomersIcon,
-    cardClass: "border-emerald-100/80 bg-emerald-50/30",
-    iconClass: "bg-emerald-100/70 text-emerald-600",
+    cardClass: "border-emerald-100 bg-emerald-50/60",
+    iconClass: "bg-emerald-100 text-emerald-600",
     getValue: (stats: DashboardStatsData) => stats.totalCustomers,
   },
   {
     label: "Currently Waiting",
     description: "Customers in line",
     icon: WaitingIcon,
-    cardClass: "border-amber-100/80 bg-amber-50/30",
-    iconClass: "bg-amber-100/70 text-amber-600",
+    cardClass: "border-amber-100 bg-amber-50/60",
+    iconClass: "bg-amber-100 text-amber-600",
     getValue: (stats: DashboardStatsData) => stats.currentlyWaiting,
   },
   {
     label: "Served Today",
     description: "Completed customers",
     icon: CheckCircleIcon,
-    cardClass: "border-blue-100/80 bg-blue-50/30",
-    iconClass: "bg-blue-100/70 text-blue-600",
+    cardClass: "border-blue-100 bg-blue-50/60",
+    iconClass: "bg-blue-100 text-blue-600",
     getValue: (stats: DashboardStatsData) => stats.servedToday,
   },
   {
     label: "No-Shows",
     description: "Skipped customers",
     icon: NoShowIcon,
-    cardClass: "border-red-100/80 bg-red-50/30",
-    iconClass: "bg-red-100/70 text-red-500",
+    cardClass: "border-red-100 bg-red-50/60",
+    iconClass: "bg-red-100 text-red-500",
     getValue: (stats: DashboardStatsData) => stats.noShows,
   },
 ];
 
 export default function DashboardStats({ stats }: DashboardStatsProps) {
   return (
-    <section className="mt-8 grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
+    <section className="mt-6 grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
       {cards.map((card) => {
         const Icon = card.icon;
 
         return (
           <div
             key={card.label}
-            className={`rounded-2xl border p-5 shadow-sm transition-shadow hover:shadow-md ${card.cardClass}`}
+            className={`rounded-2xl border p-5 shadow-sm ${card.cardClass}`}
           >
             <div className="flex items-center gap-3">
               <div
-                className={`flex h-11 w-11 shrink-0 items-center justify-center rounded-xl ${card.iconClass}`}
+                className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-xl ${card.iconClass}`}
               >
                 <Icon />
               </div>
 
-              <p className="text-sm font-medium text-zinc-700">
+              <p className="text-xs font-medium uppercase tracking-[0.08em] text-zinc-500">
                 {card.label}
               </p>
             </div>
 
             <div className="mt-4">
-              <p className="text-3xl font-semibold tracking-tight text-zinc-950">
+              <p className="text-4xl font-semibold tabular-nums tracking-tight text-zinc-950">
                 {card.getValue(stats)}
               </p>
 

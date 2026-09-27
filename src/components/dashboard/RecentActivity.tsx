@@ -50,7 +50,7 @@ export default function RecentActivity({
           {recentActivity.map((item, index) => (
             <div
               key={`${item.type}-${item.tokenNumber}-${item.timestamp.getTime()}-${index}`}
-              className="flex items-start gap-3 rounded-xl px-2 py-3 transition hover:bg-zinc-50"
+              className="flex items-start gap-3 rounded-xl px-2 py-3.5 transition hover:bg-zinc-50"
             >
               <div className="shrink-0">
                 {getActivityIcon(item.type)}
@@ -58,18 +58,18 @@ export default function RecentActivity({
 
               <div className="min-w-0 flex-1">
                 <p className="text-sm leading-5 text-zinc-700">
-                  <span className="font-semibold text-zinc-950">
+                  <span className="font-semibold text-zinc-900">
                     {item.customerName}
                   </span>{" "}
                   {getActivityText(item.type)}
                 </p>
 
-                <p className="mt-1 truncate text-xs text-zinc-400">
+                <p className="mt-1 truncate text-xs text-zinc-500">
                   Token #{item.tokenNumber} · {item.queueName}
                 </p>
               </div>
 
-              <span className="shrink-0 pt-0.5 text-xs font-medium text-zinc-400">
+              <span className="shrink-0 pt-0.5 text-xs font-medium tabular-nums text-zinc-500">
                 {formatActivityTime(item.timestamp)}
               </span>
             </div>

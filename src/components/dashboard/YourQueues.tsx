@@ -69,10 +69,10 @@ function getStatusLabel(status: string) {
 
 export default function YourQueues({ queues }: YourQueuesProps) {
   return (
-    <section className=" rounded-2xl border border-zinc-200 bg-white p-6 shadow-sm">
+    <section className="rounded-2xl border border-zinc-200 bg-white p-5 shadow-sm sm:p-6">
       <div className="flex items-center justify-between gap-4">
         <div>
-          <h2 className="text-lg font-semibold text-zinc-900">
+          <h2 className="text-lg font-semibold text-zinc-950">
             Your Queues
           </h2>
 
@@ -146,7 +146,7 @@ export default function YourQueues({ queues }: YourQueuesProps) {
                       Waiting
                     </p>
 
-                    <p className="mt-0.5 text-sm font-semibold text-zinc-900">
+                    <p className="mt-0.5 text-sm font-semibold tabular-nums text-zinc-900">
                       {item.waiting}
                     </p>
                   </div>
@@ -156,7 +156,7 @@ export default function YourQueues({ queues }: YourQueuesProps) {
                       Serving
                     </p>
 
-                    <p className="mt-0.5 text-sm font-semibold text-zinc-900">
+                    <p className="mt-0.5 text-sm font-semibold tabular-nums text-zinc-900">
                       {item.serving
                         ? `#${item.serving.tokenNumber}`
                         : "—"}
@@ -168,7 +168,7 @@ export default function YourQueues({ queues }: YourQueuesProps) {
                       Served
                     </p>
 
-                    <p className="mt-0.5 text-sm font-semibold text-zinc-900">
+                    <p className="mt-0.5 text-sm font-semibold tabular-nums text-zinc-900">
                       {item.servedToday}
                     </p>
                   </div>
@@ -177,7 +177,7 @@ export default function YourQueues({ queues }: YourQueuesProps) {
                 {/* Action */}
                 <Link
                   href={`/dashboard/queue/${item.queue._id}`}
-                  className="shrink-0 text-sm font-medium text-zinc-700 transition hover:text-zinc-950"
+                  className="shrink-0 text-sm font-medium text-emerald-700 transition hover:text-emerald-800"
                 >
                   Open Queue →
                 </Link>

@@ -32,33 +32,89 @@ function formatDate() {
 
 
 function getActivityIcon(type: string) {
+  const baseClass =
+    "flex h-9 w-9 shrink-0 items-center justify-center rounded-full";
+
   if (type === "joined") {
     return (
-      <div className="flex h-9 w-9 items-center justify-center rounded-full bg-emerald-50 text-emerald-600">
-        <span className="text-sm">+</span>
+      <div className={`${baseClass} bg-emerald-50 text-emerald-600`}>
+        <svg
+          width="16"
+          height="16"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          strokeWidth="1.8"
+          strokeLinecap="round"
+          strokeLinejoin="round"
+          aria-hidden="true"
+        >
+          <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2" />
+          <circle cx="9" cy="7" r="4" />
+          <path d="M19 8v6" />
+          <path d="M22 11h-6" />
+        </svg>
       </div>
     );
   }
 
   if (type === "called") {
     return (
-      <div className="flex h-9 w-9 items-center justify-center rounded-full bg-zinc-100 text-zinc-700">
-        <span className="text-sm">→</span>
+      <div className={`${baseClass} bg-zinc-100 text-zinc-700`}>
+        <svg
+          width="16"
+          height="16"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          strokeWidth="1.8"
+          strokeLinecap="round"
+          strokeLinejoin="round"
+          aria-hidden="true"
+        >
+          <path d="M5 12h14" />
+          <path d="m13 6 6 6-6 6" />
+        </svg>
       </div>
     );
   }
 
   if (type === "completed") {
     return (
-      <div className="flex h-9 w-9 items-center justify-center rounded-full bg-emerald-50 text-emerald-600">
-        <span className="text-sm">✓</span>
+      <div className={`${baseClass} bg-emerald-50 text-emerald-600`}>
+        <svg
+          width="16"
+          height="16"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          strokeWidth="1.8"
+          strokeLinecap="round"
+          strokeLinejoin="round"
+          aria-hidden="true"
+        >
+          <path d="M20 6 9 17l-5-5" />
+        </svg>
       </div>
     );
   }
 
   return (
-    <div className="flex h-9 w-9 items-center justify-center rounded-full bg-red-50 text-red-600">
-      <span className="text-sm">×</span>
+    <div className={`${baseClass} bg-red-50 text-red-600`}>
+      <svg
+        width="16"
+        height="16"
+        viewBox="0 0 24 24"
+        fill="none"
+        stroke="currentColor"
+        strokeWidth="1.8"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+        aria-hidden="true"
+      >
+        <path d="M18 6 6 18" />
+        <path d="m6 6 12 12" />
+      </svg>
     </div>
   );
 }
@@ -117,11 +173,11 @@ export default async function DashboardPage() {
   const currentDate = formatDate();
 
   return (
-    <div className="mx-auto max-w-[1600px] px-5 py-8 sm:px-8 lg:px-10">
+    <div className="mx-auto max-w-[1600px] p-6 sm:p-8 lg:p-10">
       {/* Greeting */}
       <section className="flex flex-col justify-between gap-4 sm:flex-row sm:items-end">
-        <div>
-          <h1 className="text-3xl font-semibold tracking-tight text-zinc-950">
+        <div className="min-w-0">
+          <h1 className="break-words text-3xl font-semibold tracking-tight text-zinc-950">
             {greeting}, {business.name} 👋
           </h1>
 
@@ -130,7 +186,9 @@ export default async function DashboardPage() {
           </p>
         </div>
 
-        <p className="text-sm font-medium text-zinc-400">{currentDate}</p>
+        <p className="shrink-0 text-sm font-medium text-zinc-500">
+          {currentDate}
+        </p>
       </section>
 
       {/* KPI Cards */}
@@ -158,7 +216,7 @@ export default async function DashboardPage() {
               </span>
 
               <span className="flex items-center gap-2">
-                <span className="h-2.5 w-2.5 rounded-full bg-zinc-300" />
+                <span className="h-2.5 w-2.5 rounded-full bg-zinc-400" />
                 Served
               </span>
             </div>
@@ -180,11 +238,11 @@ export default async function DashboardPage() {
 
         {/* Recent Activity */}
         <RecentActivity
-  recentActivity={recentActivity}
-  getActivityIcon={getActivityIcon}
-  getActivityText={getActivityText}
-  formatActivityTime={formatActivityTime}
-/>
+          recentActivity={recentActivity}
+          getActivityIcon={getActivityIcon}
+          getActivityText={getActivityText}
+          formatActivityTime={formatActivityTime}
+        />
       </section>
     </div>
   );

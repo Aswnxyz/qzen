@@ -24,15 +24,19 @@ type ActivityChartProps = {
 export default function ActivityChart({
   data,
 }: ActivityChartProps) {
+  const hasData = data.some(
+    (item) => item.joined > 0 || item.served > 0,
+  );
+
   return (
-    <div className="h-[320px] w-full">
+    <div className="relative h-[280px] w-full sm:h-[320px]">
       <ResponsiveContainer width="100%" height="100%">
         <BarChart
           data={data}
           margin={{
             top: 12,
             right: 8,
-            left: -18,
+            left: 0,
             bottom: 4,
           }}
           barGap={4}
@@ -64,7 +68,11 @@ export default function ActivityChart({
               fontSize: 11,
               fill: "#71717a",
             }}
-            width={32}
+            width={40}
+            domain={[
+              0,
+              (dataMax: number) => Math.max(Math.ceil(dataMax * 1.2), 4),
+            ]}
           />
 
           <Tooltip
@@ -102,12 +110,24 @@ export default function ActivityChart({
           <Bar
             dataKey="served"
             name="Served"
-            fill="#d4d4d8"
+            fill="#a1a1aa"
             radius={[5, 5, 0, 0]}
             maxBarSize={22}
           />
         </BarChart>
       </ResponsiveContainer>
+
+      {!hasData && (
+        <div className="pointer-events-none absolute inset-0 flex flex-col items-center justify-center rounded-xl bg-white/80 text-center">
+          <p className="text-sm font-medium text-zinc-700">
+            No activity yet
+          </p>
+
+          <p className="mt-1 text-xs text-zinc-500">
+            Activity will appear here throughout the day.
+          </p>
+        </div>
+      )}
     </div>
   );
 }
