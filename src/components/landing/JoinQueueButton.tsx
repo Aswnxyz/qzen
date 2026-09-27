@@ -34,7 +34,16 @@ function getQueuePath(value: string) {
   }
 }
 
-export default function JoinQueueButton() {
+interface JoinQueueButtonProps {
+  /** Visual treatment for the trigger button */
+  variant?: "light" | "dark";
+  className?: string;
+}
+
+export default function JoinQueueButton({
+  variant = "light",
+  className = "",
+}: JoinQueueButtonProps) {
   const router = useRouter();
 
   const [open, setOpen] = useState(false);
@@ -58,12 +67,17 @@ export default function JoinQueueButton() {
     setError("");
   }
 
+  const triggerClasses =
+    variant === "dark"
+      ? "border-line-dark-strong text-on-dark hover:border-qz-accent hover:text-qz-accent-strong"
+      : "border-qzen-border-strong text-ink-text hover:border-qzen-brand hover:text-qzen-brand-strong";
+
   return (
     <>
       <button
         type="button"
         onClick={() => setOpen(true)}
-        className="inline-flex items-center justify-center rounded-qzen-md border border-qzen-border-strong bg-qzen-surface px-6 py-3.5 text-sm font-semibold text-qzen-text hover:border-qzen-brand hover:text-qzen-brand-strong"
+        className={`inline-flex h-10 items-center justify-center rounded-xl border px-4 text-sm font-semibold transition ${triggerClasses} ${className}`}
       >
         Join a queue
       </button>
