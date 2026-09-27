@@ -65,6 +65,27 @@
   --qz-warning: #f59e0b;
   --qz-danger: #ef4444;
   --qz-info: #3b82f6;
+
+  /* Qzen landing — dark acts */
+  --qzl-ink: #080b0f;
+  --qzl-ink-raise: #0f151c;
+  --qzl-ink-2: #141c25;
+  --qzl-line-dark: rgba(255, 255, 255, 0.08);
+  --qzl-line-dark-strong: rgba(255, 255, 255, 0.16);
+  --qzl-on-dark: #eef2f0;
+  --qzl-on-dark-2: #a3afaa;
+  --qzl-on-dark-3: #7c8a84;
+  --qzl-signal: #f59e0b;
+
+  /* Qzen landing — light acts */
+  --qzl-paper: #f7faf8;
+  --qzl-paper-2: #f0f5f2;
+  --qzl-paper-3: #ffffff;
+  --qzl-ink-text: #17211b;
+  --qzl-ink-text-2: #52605a;
+  --qzl-ink-text-3: #748079;
+  --qzl-line-light: #d9e3dc;
+  --qzl-line-light-strong: #c2d0c7;
 }
 
 @theme inline {
@@ -123,6 +144,30 @@
   --color-qz-warning: var(--qz-warning);
   --color-qz-danger: var(--qz-danger);
   --color-qz-info: var(--qz-info);
+
+  /* Qzen landing — dark acts */
+  --color-ink: var(--qzl-ink);
+  --color-ink-raise: var(--qzl-ink-raise);
+  --color-ink-2: var(--qzl-ink-2);
+  --color-line-dark: var(--qzl-line-dark);
+  --color-line-dark-strong: var(--qzl-line-dark-strong);
+  --color-on-dark: var(--qzl-on-dark);
+  --color-on-dark-2: var(--qzl-on-dark-2);
+  --color-on-dark-3: var(--qzl-on-dark-3);
+  --color-signal: var(--qzl-signal);
+
+  /* Qzen landing — light acts */
+  --color-paper: var(--qzl-paper);
+  --color-paper-2: var(--qzl-paper-2);
+  --color-paper-3: var(--qzl-paper-3);
+  --color-ink-text: var(--qzl-ink-text);
+  --color-ink-text-2: var(--qzl-ink-text-2);
+  --color-ink-text-3: var(--qzl-ink-text-3);
+  --color-line-light: var(--qzl-line-light);
+  --color-line-light-strong: var(--qzl-line-light-strong);
+
+  /* Qzen landing — type */
+  --font-editorial: var(--font-instrument), Georgia, "Times New Roman", serif;
 }
 
 body {
@@ -206,4 +251,181 @@ body {
       color-mix(in srgb, var(--qz-accent) 22%, transparent) 0%,
       transparent 55%
     );
+}
+
+/* ── Qzen landing ────────────────────────────────────────────────── */
+
+/* Smooth anchor scrolling is scoped to the landing page so app routes
+   (dashboard, auth) keep instant, predictable scroll restoration. */
+html:has(.landing-root) {
+  scroll-behavior: smooth;
+}
+
+/* Anchored sections clear the sticky header */
+.landing-section {
+  scroll-margin-top: 72px;
+}
+
+/* Hero vertical rhythm scales with viewport height on desktop. The floating
+   tableau is a fixed height, so on short screens its QR tile would otherwise
+   land across the fold. Only the hero's outer padding flexes — tableau, copy,
+   animation and every breakpoint stay as designed — and viewports >= ~860px
+   resolve to the original 96px / 112px, so tall screens are unchanged. */
+@media (min-width: 1024px) {
+  #join .qzl-hero-grid {
+    padding-top: clamp(16px, calc(100vh - 724px), 96px);
+    padding-bottom: clamp(32px, calc(100vh - 712px), 112px);
+  }
+}
+
+/* Editorial display face — used for headlines and accent phrases */
+.font-editorial {
+  font-family: var(--font-editorial);
+  font-weight: 400;
+}
+
+/* Fine engineering grid used behind dark acts */
+.qzl-grid {
+  background-image:
+    linear-gradient(to right, rgba(255, 255, 255, 0.035) 1px, transparent 1px),
+    linear-gradient(to bottom, rgba(255, 255, 255, 0.035) 1px, transparent 1px);
+  background-size: 56px 56px;
+}
+
+/* Paper-fiber grid for light acts (very faint) */
+.qzl-grid-light {
+  background-image:
+    linear-gradient(to right, rgba(23, 33, 27, 0.035) 1px, transparent 1px),
+    linear-gradient(to bottom, rgba(23, 33, 27, 0.035) 1px, transparent 1px);
+  background-size: 56px 56px;
+}
+
+/* Film grain — keeps large dark fields from banding */
+.qzl-grain::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  opacity: 0.35;
+  mix-blend-mode: overlay;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='140' height='140'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='140' height='140' filter='url(%23n)' opacity='0.5'/%3E%3C/svg%3E");
+}
+
+/* Seamless industry marquee */
+@keyframes qzl-marquee {
+  from {
+    transform: translate3d(0, 0, 0);
+  }
+  to {
+    transform: translate3d(-50%, 0, 0);
+  }
+}
+
+.qzl-marquee-track {
+  animation: qzl-marquee 44s linear infinite;
+  will-change: transform;
+}
+
+.qzl-marquee:hover .qzl-marquee-track {
+  animation-play-state: paused;
+}
+
+/* Hero queue rail — dots drift right along a hairline */
+@keyframes qzl-rail-drift {
+  from {
+    transform: translate3d(-12%, 0, 0);
+  }
+  to {
+    transform: translate3d(112%, 0, 0);
+  }
+}
+
+.qzl-rail-runner {
+  animation: qzl-rail-runner 9s cubic-bezier(0.45, 0, 0.55, 1) infinite;
+}
+
+@keyframes qzl-rail-pulse {
+  0%,
+  100% {
+    opacity: 0.35;
+    transform: scale(1);
+  }
+  50% {
+    opacity: 1;
+    transform: scale(1.35);
+  }
+}
+
+.qzl-rail-pulse {
+  animation: qzl-rail-pulse 2.6s ease-in-out infinite;
+}
+
+/* Soft edge fade for full-bleed tracks */
+.qzl-fade-x {
+  -webkit-mask-image: linear-gradient(
+    to right,
+    transparent,
+    #000 8%,
+    #000 92%,
+    transparent
+  );
+  mask-image: linear-gradient(
+    to right,
+    transparent,
+    #000 8%,
+    #000 92%,
+    transparent
+  );
+}
+
+/* Act seams: a short bleed between dark and paper acts so the page reads
+   as one continuous experience rather than stacked blocks. */
+.qzl-seam-ink-to-paper {
+  background: linear-gradient(to bottom, var(--qzl-ink) 0%, var(--qzl-paper) 100%);
+}
+
+.qzl-seam-paper-to-ink {
+  background: linear-gradient(to bottom, var(--qzl-paper) 0%, var(--qzl-ink) 100%);
+}
+
+.qzl-seam-white-to-ink {
+  background: linear-gradient(to bottom, var(--qzl-paper-3) 0%, var(--qzl-ink) 100%);
+}
+
+/* Text mask reveal (used with motion variants) */
+.qzl-mask-line {
+  display: block;
+  overflow: hidden;
+}
+
+/* Hairline rules that feel drawn rather than printed */
+.qzl-hairline {
+  height: 1px;
+  background: var(--qzl-line-light);
+}
+
+.qzl-hairline-dark {
+  height: 1px;
+  background: var(--qzl-line-dark);
+}
+
+/* QR tile pattern (decorative) */
+.qzl-qr {
+  background-image:
+    linear-gradient(to right, currentColor 2px, transparent 2px),
+    linear-gradient(to bottom, currentColor 2px, transparent 2px);
+  background-size: 8px 8px;
+  background-position: 0 0;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html:has(.landing-root) {
+    scroll-behavior: auto;
+  }
+
+  .qzl-marquee-track,
+  .qzl-rail-runner,
+  .qzl-rail-pulse {
+    animation: none !important;
+  }
 }
