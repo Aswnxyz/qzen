@@ -32,6 +32,22 @@ function formatDate(dateKey: string) {
   }).format(new Date(Number(year), Number(month) - 1, Number(day)));
 }
 
+function getStatusClasses(status: string) {
+  if (status === "completed") {
+    return "bg-qz-accent-soft text-emerald-300 ring-emerald-500/25";
+  }
+
+  if (status === "serving") {
+    return "bg-blue-500/12 text-blue-400 ring-blue-500/25";
+  }
+
+  if (status === "waiting") {
+    return "bg-amber-500/12 text-amber-400 ring-amber-500/25";
+  }
+
+  return "bg-red-500/12 text-red-400 ring-red-500/25";
+}
+
 export default async function QueueHistoryPage({
   params,
 }: QueueHistoryPageProps) {
@@ -89,109 +105,113 @@ export default async function QueueHistoryPage({
   return (
    
 
-      <section className="flex-1 p-8">
+      <section className="mx-auto w-full max-w-[1500px] flex-1 px-5 py-6 sm:px-8 sm:py-8 lg:px-10">
         <Link
           href={`/dashboard/queue/${queueId}`}
-          className="text-sm text-zinc-500 hover:text-zinc-900"
+          className="text-sm text-qz-text-2 hover:text-qz-text"
         >
           ← Back to Queue Dashboard
         </Link>
 
         <header className="mt-8">
-          <p className="text-sm text-zinc-500">
+          <p className="text-sm text-qz-text-2">
             {business.name}
           </p>
 
-          <h1 className="mt-1 text-3xl font-bold text-zinc-900">
+          <h1 className="mt-1 text-3xl font-semibold tracking-[-0.03em] text-white">
             {queue.name}
           </h1>
 
-          <p className="mt-2 text-zinc-600">
+          <p className="mt-2 text-qz-text-2">
             Queue History · {formatDate(dateKey)}
           </p>
         </header>
 
         <div className="mt-10 grid gap-6 md:grid-cols-4">
-          <div className="rounded-2xl border border-zinc-200 bg-white p-6">
-            <p className="text-sm text-zinc-500">
+          <div className="rounded-2xl border border-qz-line bg-qz-surface p-6">
+            <p className="text-sm text-qz-text-2">
               Total customers
             </p>
 
-            <p className="mt-2 text-3xl font-bold">
+            <p className="mt-2 text-3xl font-semibold tabular-nums tracking-[-0.03em] text-white">
               {summary.totalCustomers}
             </p>
           </div>
 
-          <div className="rounded-2xl border border-zinc-200 bg-white p-6">
-            <p className="text-sm text-zinc-500">
+          <div className="rounded-2xl border border-qz-line bg-qz-surface p-6">
+            <p className="text-sm text-qz-text-2">
               Completed
             </p>
 
-            <p className="mt-2 text-3xl font-bold">
+            <p className="mt-2 text-3xl font-semibold tabular-nums tracking-[-0.03em] text-emerald-400">
               {summary.completed}
             </p>
           </div>
 
-          <div className="rounded-2xl border border-zinc-200 bg-white p-6">
-            <p className="text-sm text-zinc-500">
+          <div className="rounded-2xl border border-qz-line bg-qz-surface p-6">
+            <p className="text-sm text-qz-text-2">
               Skipped
             </p>
 
-            <p className="mt-2 text-3xl font-bold">
+            <p className="mt-2 text-3xl font-semibold tabular-nums tracking-[-0.03em] text-red-400">
               {summary.skipped}
             </p>
           </div>
 
-          <div className="rounded-2xl border border-zinc-200 bg-white p-6">
-            <p className="text-sm text-zinc-500">
+          <div className="rounded-2xl border border-qz-line bg-qz-surface p-6">
+            <p className="text-sm text-qz-text-2">
               Avg. service time
             </p>
 
-            <p className="mt-2 text-3xl font-bold">
+            <p className="mt-2 text-3xl font-semibold tabular-nums tracking-[-0.03em] text-white">
               {averageServiceTime}
             </p>
           </div>
         </div>
 
-        <div className="mt-10 rounded-2xl border border-zinc-200 bg-white p-8">
+        <div className="mt-10 rounded-2xl border border-qz-line bg-qz-surface p-8">
           <div>
-            <h2 className="text-xl font-semibold text-zinc-900">
+            <h2 className="text-xl font-semibold text-qz-text">
               Customer History
             </h2>
 
-            <p className="mt-2 text-sm text-zinc-500">
+            <p className="mt-2 text-sm text-qz-text-2">
               Every customer who joined this queue session.
             </p>
           </div>
 
           <div className="mt-6 space-y-3">
             {entries.length === 0 ? (
-              <p className="text-sm text-zinc-500">
+              <p className="text-sm text-qz-text-2">
                 No customers joined this session.
               </p>
             ) : (
               entries.map((entry) => (
                 <div
                   key={entry._id.toString()}
-                  className="rounded-xl bg-zinc-50 px-5 py-4"
+                  className="rounded-xl bg-qz-surface-2 px-5 py-4"
                 >
                   <div className="flex items-center justify-between">
                     <div>
-                      <p className="font-semibold text-zinc-900">
+                      <p className="font-semibold text-qz-text">
                         #{entry.tokenNumber}
                       </p>
 
-                      <p className="mt-1 text-sm text-zinc-600">
+                      <p className="mt-1 text-sm text-qz-text-2">
                         {entry.customerName}
                       </p>
                     </div>
 
-                    <span className="text-sm font-medium capitalize text-zinc-500">
+                    <span
+                      className={`inline-flex rounded-full px-2.5 py-1 text-[11px] font-semibold capitalize ring-1 ring-inset ${getStatusClasses(
+                        entry.status,
+                      )}`}
+                    >
                       {entry.status}
                     </span>
                   </div>
 
-                  <div className="mt-4 grid gap-3 text-sm text-zinc-500 sm:grid-cols-3">
+                  <div className="mt-4 grid gap-3 text-sm text-qz-text-2 sm:grid-cols-3">
                     <p>
                       Joined:{" "}
                       {formatTime(entry.joinedAt)}
@@ -216,12 +236,12 @@ export default async function QueueHistoryPage({
           </div>
         </div>
 
-        <div className="mt-10 rounded-2xl border border-zinc-200 bg-white p-8">
-          <h2 className="text-xl font-semibold text-zinc-900">
+        <div className="mt-10 rounded-2xl border border-qz-line bg-qz-surface p-8">
+          <h2 className="text-xl font-semibold text-qz-text">
             Session Information
           </h2>
 
-          <div className="mt-4 space-y-2 text-sm text-zinc-600">
+          <div className="mt-4 space-y-2 text-sm text-qz-text-2">
             <p>
               Session status:{" "}
               <span className="font-medium capitalize">

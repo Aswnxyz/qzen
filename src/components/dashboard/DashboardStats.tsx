@@ -37,11 +37,12 @@ function WaitingIcon() {
       fill="none"
       stroke="currentColor"
       strokeWidth="1.8"
+      strokeLinecap="round"
+      strokeLinejoin="round"
       aria-hidden="true"
     >
       <circle cx="12" cy="12" r="9" />
-      <path d="M8 12h8" />
-      <path d="M12 8v8" />
+      <path d="M12 7v5l3 2" />
     </svg>
   );
 }
@@ -86,69 +87,81 @@ const cards = [
     label: "Total Customers",
     description: "Customers today",
     icon: CustomersIcon,
-    cardClass: "border-emerald-100 bg-emerald-50/60",
-    iconClass: "bg-emerald-100 text-emerald-600",
+    tile: "bg-emerald-500/12 text-emerald-400 ring-emerald-500/25",
+    glow: "bg-emerald-500/25",
+    line: "from-emerald-500/70",
     getValue: (stats: DashboardStatsData) => stats.totalCustomers,
   },
   {
     label: "Currently Waiting",
     description: "Customers in line",
     icon: WaitingIcon,
-    cardClass: "border-amber-100 bg-amber-50/60",
-    iconClass: "bg-amber-100 text-amber-600",
+    tile: "bg-amber-500/12 text-amber-400 ring-amber-500/25",
+    glow: "bg-amber-500/22",
+    line: "from-amber-500/70",
     getValue: (stats: DashboardStatsData) => stats.currentlyWaiting,
   },
   {
     label: "Served Today",
     description: "Completed customers",
     icon: CheckCircleIcon,
-    cardClass: "border-blue-100 bg-blue-50/60",
-    iconClass: "bg-blue-100 text-blue-600",
+    tile: "bg-blue-500/12 text-blue-400 ring-blue-500/25",
+    glow: "bg-blue-500/22",
+    line: "from-blue-500/70",
     getValue: (stats: DashboardStatsData) => stats.servedToday,
   },
   {
     label: "No-Shows",
     description: "Skipped customers",
     icon: NoShowIcon,
-    cardClass: "border-red-100 bg-red-50/60",
-    iconClass: "bg-red-100 text-red-500",
+    tile: "bg-red-500/12 text-red-400 ring-red-500/25",
+    glow: "bg-red-500/22",
+    line: "from-red-500/70",
     getValue: (stats: DashboardStatsData) => stats.noShows,
   },
 ];
 
 export default function DashboardStats({ stats }: DashboardStatsProps) {
   return (
-    <section className="mt-6 grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
+    <section className="mt-5 grid gap-5 sm:grid-cols-2 xl:grid-cols-4">
       {cards.map((card) => {
         const Icon = card.icon;
 
         return (
-          <div
+          <article
             key={card.label}
-            className={`rounded-2xl border p-5 shadow-sm ${card.cardClass}`}
+            className="relative overflow-hidden rounded-3xl border border-qz-line bg-qz-surface p-5"
           >
-            <div className="flex items-center gap-3">
-              <div
-                className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-xl ${card.iconClass}`}
+            <div
+              aria-hidden="true"
+              className={`pointer-events-none absolute -right-14 -top-16 h-40 w-40 rounded-full blur-3xl ${card.glow}`}
+            />
+
+            <div className="relative flex items-center gap-3">
+              <span
+                className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-xl ring-1 ring-inset ${card.tile}`}
               >
                 <Icon />
-              </div>
+              </span>
 
-              <p className="text-xs font-medium uppercase tracking-[0.08em] text-zinc-500">
+              <p className="text-[11px] font-semibold uppercase tracking-[0.16em] text-qz-text-2">
                 {card.label}
               </p>
             </div>
 
-            <div className="mt-4">
-              <p className="text-4xl font-semibold tabular-nums tracking-tight text-zinc-950">
-                {card.getValue(stats)}
-              </p>
+            <p className="relative mt-6 text-[2.75rem] font-semibold leading-none tracking-[-0.04em] tabular-nums text-white">
+              {card.getValue(stats)}
+            </p>
 
-              <p className="mt-1 text-xs text-zinc-500">
-                {card.description}
-              </p>
-            </div>
-          </div>
+            <p className="relative mt-2.5 text-[13px] text-qz-text-3">
+              {card.description}
+            </p>
+
+            <div
+              aria-hidden="true"
+              className={`absolute inset-x-0 bottom-0 h-px bg-gradient-to-r to-transparent ${card.line}`}
+            />
+          </article>
         );
       })}
     </section>

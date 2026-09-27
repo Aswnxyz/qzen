@@ -45,6 +45,26 @@
   --qzen-text-title: 1.25rem;
   --qzen-text-body: 1rem;
   --qzen-text-caption: 0.875rem;
+
+  /* Qzen app (dashboard) — dark theme */
+  --qz-bg: #080b0f;
+  --qz-bg-raise: #0b1015;
+  --qz-surface: #0f151c;
+  --qz-surface-2: #141c25;
+  --qz-surface-3: #1a232e;
+  --qz-line: rgba(255, 255, 255, 0.07);
+  --qz-line-strong: rgba(255, 255, 255, 0.13);
+  --qz-text: #eef2f0;
+  --qz-text-2: #a3afaa;
+  --qz-text-3: #6d7a75;
+  --qz-accent: #10b981;
+  --qz-accent-strong: #34d399;
+  --qz-accent-ink: #052e22;
+  --qz-accent-soft: rgba(16, 185, 129, 0.14);
+  --qz-success: #34d399;
+  --qz-warning: #f59e0b;
+  --qz-danger: #ef4444;
+  --qz-info: #3b82f6;
 }
 
 @theme inline {
@@ -83,6 +103,26 @@
   --text-qzen-caption: var(--qzen-text-caption);
   --font-sans: var(--font-geist-sans);
   --font-mono: var(--font-geist-mono);
+
+  /* Qzen app (dashboard) */
+  --color-qz-bg: var(--qz-bg);
+  --color-qz-raise: var(--qz-bg-raise);
+  --color-qz-surface: var(--qz-surface);
+  --color-qz-surface-2: var(--qz-surface-2);
+  --color-qz-surface-3: var(--qz-surface-3);
+  --color-qz-line: var(--qz-line);
+  --color-qz-line-strong: var(--qz-line-strong);
+  --color-qz-text: var(--qz-text);
+  --color-qz-text-2: var(--qz-text-2);
+  --color-qz-text-3: var(--qz-text-3);
+  --color-qz-accent: var(--qz-accent);
+  --color-qz-accent-strong: var(--qz-accent-strong);
+  --color-qz-accent-ink: var(--qz-accent-ink);
+  --color-qz-accent-soft: var(--qz-accent-soft);
+  --color-qz-success: var(--qz-success);
+  --color-qz-warning: var(--qz-warning);
+  --color-qz-danger: var(--qz-danger);
+  --color-qz-info: var(--qz-info);
 }
 
 body {
@@ -117,4 +157,53 @@ body {
     animation-duration: 0.01ms !important;
     animation-iteration-count: 1 !important;
   }
+}
+
+/* ── Qzen dashboard shell ─────────────────────────────────────────── */
+.qz-dash {
+  color-scheme: dark;
+  background-color: var(--qz-bg);
+  color: var(--qz-text);
+}
+
+.qz-dash ::selection {
+  background: color-mix(in srgb, var(--qz-accent) 40%, transparent);
+  color: #ffffff;
+}
+
+/* Slim, theme-aware scrollbars for the dashboard scroll area */
+.qz-dash ::-webkit-scrollbar {
+  width: 10px;
+  height: 10px;
+}
+
+.qz-dash ::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.qz-dash ::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.12);
+  background-clip: padding-box;
+  border: 3px solid transparent;
+  border-radius: 999px;
+}
+
+.qz-dash ::-webkit-scrollbar-thumb:hover {
+  background: rgba(255, 255, 255, 0.22);
+  background-clip: padding-box;
+}
+
+.qz-dash {
+  scrollbar-color: rgba(255, 255, 255, 0.14) transparent;
+  scrollbar-width: thin;
+}
+
+/* Utility: soft radial accent glow used on hero + KPI surfaces */
+.qz-glow {
+  background:
+    radial-gradient(
+      120% 140% at 0% 0%,
+      color-mix(in srgb, var(--qz-accent) 22%, transparent) 0%,
+      transparent 55%
+    );
 }

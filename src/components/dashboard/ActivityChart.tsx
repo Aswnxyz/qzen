@@ -29,7 +29,7 @@ export default function ActivityChart({
   );
 
   return (
-    <div className="relative h-[280px] w-full sm:h-[320px]">
+    <div className="relative h-[300px] w-full sm:h-[340px]">
       <ResponsiveContainer width="100%" height="100%">
         <BarChart
           data={data}
@@ -44,7 +44,7 @@ export default function ActivityChart({
         >
           <CartesianGrid
             vertical={false}
-            stroke="#e4e4e7"
+            stroke="rgba(255, 255, 255, 0.06)"
             strokeDasharray="3 4"
           />
 
@@ -54,10 +54,11 @@ export default function ActivityChart({
             tickLine={false}
             tick={{
               fontSize: 11,
-              fill: "#71717a",
+              fill: "#6d7a75",
             }}
             dy={8}
             interval="preserveStartEnd"
+            minTickGap={20}
           />
 
           <YAxis
@@ -66,7 +67,7 @@ export default function ActivityChart({
             tickLine={false}
             tick={{
               fontSize: 11,
-              fill: "#71717a",
+              fill: "#6d7a75",
             }}
             width={40}
             domain={[
@@ -77,24 +78,24 @@ export default function ActivityChart({
 
           <Tooltip
             cursor={{
-              fill: "#f4f4f5",
-              opacity: 0.6,
+              fill: "rgba(255, 255, 255, 0.05)",
             }}
             contentStyle={{
-              borderRadius: "12px",
-              border: "1px solid #e4e4e7",
-              backgroundColor: "#ffffff",
-              boxShadow: "0 8px 24px rgba(0, 0, 0, 0.08)",
+              borderRadius: "14px",
+              border: "1px solid rgba(255, 255, 255, 0.12)",
+              backgroundColor: "#141c25",
+              boxShadow: "0 20px 40px -12px rgba(0, 0, 0, 0.7)",
               padding: "10px 12px",
             }}
             labelStyle={{
-              color: "#18181b",
+              color: "#eef2f0",
               fontSize: "12px",
               fontWeight: 600,
               marginBottom: "4px",
             }}
             itemStyle={{
               fontSize: "12px",
+              color: "#a3afaa",
               padding: "2px 0",
             }}
           />
@@ -110,7 +111,7 @@ export default function ActivityChart({
           <Bar
             dataKey="served"
             name="Served"
-            fill="#a1a1aa"
+            fill="rgba(255, 255, 255, 0.22)"
             radius={[5, 5, 0, 0]}
             maxBarSize={22}
           />
@@ -118,12 +119,12 @@ export default function ActivityChart({
       </ResponsiveContainer>
 
       {!hasData && (
-        <div className="pointer-events-none absolute inset-0 flex flex-col items-center justify-center rounded-xl bg-white/80 text-center">
-          <p className="text-sm font-medium text-zinc-700">
+        <div className="pointer-events-none absolute inset-0 flex flex-col items-center justify-center rounded-xl bg-qz-surface/85 text-center">
+          <p className="text-sm font-medium text-qz-text-2">
             No activity yet
           </p>
 
-          <p className="mt-1 text-xs text-zinc-500">
+          <p className="mt-1 text-xs text-qz-text-3">
             Activity will appear here throughout the day.
           </p>
         </div>

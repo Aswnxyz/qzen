@@ -40,13 +40,13 @@ export default async function SettingsPage() {
   ];
 
   return (
-    <section className="p-6 sm:p-8 lg:p-10">
+    <section className="mx-auto max-w-[1500px] px-5 py-6 sm:px-8 sm:py-8 lg:px-10">
       <header>
-        <h1 className="text-3xl font-semibold tracking-tight text-zinc-950">
+        <h1 className="text-3xl font-semibold tracking-[-0.03em] text-white">
           Settings
         </h1>
 
-        <p className="mt-2 text-sm text-zinc-500">
+        <p className="mt-2 text-sm text-qz-text-2">
           Manage your business and account settings.
         </p>
       </header>

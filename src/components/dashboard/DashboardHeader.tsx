@@ -206,11 +206,11 @@ function HelpIcon() {
 }
 
 function getNavigationItemClasses(active: boolean) {
-  return `flex items-center gap-3 rounded-xl px-4 py-3 text-sm font-medium transition ${
-    active
-      ? "bg-emerald-50 text-emerald-800"
-      : "text-zinc-600 hover:bg-zinc-50 hover:text-zinc-950"
-  }`;
+  if (active) {
+    return "flex items-center gap-3 rounded-xl bg-qz-accent-soft px-4 py-2.5 text-sm font-semibold text-emerald-300 shadow-[inset_0_1px_0_0_rgba(255,255,255,0.06)] ring-1 ring-inset ring-emerald-500/25 transition";
+  }
+
+  return "flex items-center gap-3 rounded-xl px-4 py-2.5 text-sm font-medium text-qz-text-2 transition hover:bg-white/5 hover:text-qz-text";
 }
 
 export default function DashboardHeader({
@@ -281,19 +281,25 @@ export default function DashboardHeader({
 
   return (
     <>
-      <header className="border-b border-zinc-200 bg-white">
+      <header className="sticky top-0 z-30 border-b border-qz-line bg-qz-bg/85 backdrop-blur-md">
         <div className="flex min-h-[72px] items-center justify-between gap-4 px-5 sm:px-8 lg:px-10">
           {/* Desktop Search */}
-          <div className="hidden w-full max-w-[620px] sm:block">
-            <div className="flex h-10 items-center gap-3 rounded-xl border border-zinc-200 bg-zinc-50/60 px-3.5 text-zinc-400 transition focus-within:border-zinc-300 focus-within:bg-white">
+          <div className="hidden w-full max-w-[560px] sm:block">
+            <button
+              type="button"
+              aria-label="Search"
+              className="flex h-10 w-full cursor-pointer items-center gap-3 rounded-xl border border-qz-line bg-white/[0.04] px-3.5 text-left text-qz-text-3 transition hover:border-qz-line-strong hover:bg-white/[0.07]"
+            >
               <SearchIcon />
 
-              <span className="text-sm text-zinc-400">Search anything...</span>
+              <span className="text-sm text-qz-text-3">
+                Search anything...
+              </span>
 
-              <span className="ml-auto rounded-md border border-zinc-200 bg-white px-2 py-1 text-[10px] font-medium tracking-wide text-zinc-400">
+              <span className="ml-auto rounded-md border border-qz-line bg-white/5 px-2 py-1 text-[10px] font-medium tracking-wide text-qz-text-3">
                 Ctrl K
               </span>
-            </div>
+            </button>
           </div>
 
           {/* Mobile Menu Button */}
@@ -302,7 +308,7 @@ export default function DashboardHeader({
             aria-label="Open navigation menu"
             aria-expanded={menuOpen}
             onClick={() => setMenuOpen(true)}
-            className="flex h-10 w-10 items-center justify-center rounded-xl text-zinc-600 transition hover:bg-zinc-50 hover:text-zinc-950 sm:hidden"
+            className="flex h-10 w-10 cursor-pointer items-center justify-center rounded-xl text-qz-text-2 transition hover:bg-white/5 hover:text-qz-text sm:hidden"
           >
             <MenuIcon />
           </button>
@@ -312,17 +318,17 @@ export default function DashboardHeader({
             <button
               type="button"
               aria-label="Notifications"
-              className="relative flex h-10 w-10 items-center justify-center rounded-xl text-zinc-500 transition hover:bg-zinc-50 hover:text-zinc-900"
+              className="relative flex h-10 w-10 cursor-pointer items-center justify-center rounded-xl text-qz-text-2 transition hover:bg-white/5 hover:text-qz-text"
             >
               <BellIcon />
 
               <span
                 aria-hidden="true"
-                className="absolute right-2.5 top-2 h-1.5 w-1.5 rounded-full bg-red-500"
+                className="absolute right-2.5 top-2 h-1.5 w-1.5 rounded-full bg-qz-danger shadow-[0_0_8px_rgba(239,68,68,0.9)]"
               />
             </button>
 
-            <div className="hidden h-8 w-px bg-zinc-200 sm:block" />
+            <div className="hidden h-8 w-px bg-qz-line-strong sm:block" />
 
             {/* Business Profile */}
             <div ref={profileRef} className="relative">
@@ -331,18 +337,20 @@ export default function DashboardHeader({
                 aria-label={`${businessName} business profile`}
                 aria-expanded={profileOpen}
                 onClick={() => setProfileOpen((open) => !open)}
-                className="group flex items-center gap-3 rounded-xl px-2 py-1.5 transition hover:bg-zinc-50"
+                className="group flex cursor-pointer items-center gap-3 rounded-xl p-1.5 transition hover:bg-white/5"
               >
-                <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-zinc-900 text-sm font-semibold text-white">
+                <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-qz-accent text-sm font-bold text-qz-accent-ink ring-1 ring-emerald-400/30">
                   {initial}
                 </div>
 
                 <div className="hidden min-w-0 text-left md:block">
-                  <p className="max-w-[180px] truncate text-sm font-semibold text-zinc-900">
+                  <p className="max-w-[180px] truncate text-sm font-semibold text-qz-text">
                     {businessName}
                   </p>
 
-                  <p className="mt-0.5 text-xs text-zinc-500">Business Owner</p>
+                  <p className="mt-0.5 text-xs text-qz-text-3">
+                    Business Owner
+                  </p>
                 </div>
 
                 <ChevronDownIcon open={profileOpen} />
@@ -350,19 +358,19 @@ export default function DashboardHeader({
 
               {/* Profile Dropdown */}
               {profileOpen && (
-                <div className="absolute right-0 top-[calc(100%+10px)] z-40 w-64 overflow-hidden rounded-2xl border border-zinc-200 bg-white shadow-lg shadow-zinc-950/10">
-                  <div className="border-b border-zinc-100 px-4 py-4">
+                <div className="absolute right-0 top-[calc(100%+10px)] z-40 w-64 overflow-hidden rounded-2xl border border-qz-line-strong bg-qz-surface shadow-2xl shadow-black/50">
+                  <div className="border-b border-qz-line px-4 py-4">
                     <div className="flex items-center gap-3">
-                      <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-zinc-900 text-sm font-semibold text-white">
+                      <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-qz-accent text-sm font-bold text-qz-accent-ink ring-1 ring-emerald-400/30">
                         {initial}
                       </div>
 
                       <div className="min-w-0">
-                        <p className="truncate text-sm font-semibold text-zinc-950">
+                        <p className="truncate text-sm font-semibold text-qz-text">
                           {businessName}
                         </p>
 
-                        <p className="mt-0.5 text-xs text-zinc-500">
+                        <p className="mt-0.5 text-xs text-qz-text-3">
                           Business Owner
                         </p>
                       </div>
@@ -373,18 +381,18 @@ export default function DashboardHeader({
                     <Link
                       href="/dashboard/settings"
                       onClick={() => setProfileOpen(false)}
-                      className={`flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium transition ${
+                      className={
                         isSettingsActive
-                          ? "bg-emerald-50 text-emerald-800"
-                          : "text-zinc-600 hover:bg-zinc-50 hover:text-zinc-950"
-                      }`}
+                          ? "flex items-center gap-3 rounded-xl bg-qz-accent-soft px-3 py-2.5 text-sm font-semibold text-emerald-300 ring-1 ring-inset ring-emerald-500/25 transition"
+                          : "flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium text-qz-text-2 transition hover:bg-white/5 hover:text-qz-text"
+                      }
                     >
                       <SettingsIcon />
                       <span>Business settings</span>
                     </Link>
                   </div>
 
-                  <div className="border-t border-zinc-100 p-2">
+                  <div className="border-t border-qz-line p-2">
                     <SignOutButton />
                   </div>
                 </div>
@@ -402,23 +410,23 @@ export default function DashboardHeader({
             type="button"
             aria-label="Close navigation menu"
             onClick={() => setMenuOpen(false)}
-            className="absolute inset-0 bg-zinc-950/30 backdrop-blur-[2px]"
+            className="absolute inset-0 cursor-pointer bg-black/60 backdrop-blur-[2px]"
           />
 
           {/* Drawer */}
-          <aside className="absolute inset-y-0 left-0 flex w-[min(82vw,320px)] flex-col bg-white shadow-2xl">
+          <aside className="absolute inset-y-0 left-0 flex w-[min(84vw,300px)] flex-col border-r border-qz-line bg-qz-raise shadow-2xl shadow-black/60">
             {/* Drawer Header */}
-            <div className="flex items-start justify-between border-b border-zinc-100 px-6 py-5">
+            <div className="flex items-start justify-between border-b border-qz-line px-6 py-5">
               <div>
                 <Link
                   href="/dashboard"
                   onClick={() => setMenuOpen(false)}
-                  className="text-3xl font-bold tracking-tight text-zinc-950"
+                  className="text-[26px] font-bold tracking-[-0.04em] text-white"
                 >
-                  Q<span className="text-emerald-600">z</span>en
+                  Q<span className="text-qz-accent">z</span>en
                 </Link>
 
-                <p className="mt-1 text-xs text-zinc-400">
+                <p className="mt-1.5 text-[10px] font-semibold uppercase tracking-[0.18em] text-qz-text-3">
                   Join. Relax. Get Served.
                 </p>
               </div>
@@ -427,7 +435,7 @@ export default function DashboardHeader({
                 type="button"
                 aria-label="Close navigation menu"
                 onClick={() => setMenuOpen(false)}
-                className="flex h-10 w-10 items-center justify-center rounded-xl text-zinc-500 transition hover:bg-zinc-50 hover:text-zinc-950"
+                className="flex h-10 w-10 cursor-pointer items-center justify-center rounded-xl text-qz-text-2 transition hover:bg-white/5 hover:text-qz-text"
               >
                 <CloseIcon />
               </button>
@@ -484,19 +492,19 @@ export default function DashboardHeader({
             </nav>
 
             {/* Account */}
-            <div className="space-y-5 border-t border-zinc-100 px-5 py-5">
-              <div className="rounded-2xl border border-zinc-100 bg-zinc-50 p-4">
+            <div className="space-y-3 border-t border-qz-line px-4 py-4">
+              <div className="rounded-2xl border border-qz-line bg-qz-surface p-3.5">
                 <div className="flex items-center gap-3">
-                  <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-amber-50 text-sm font-semibold text-amber-700">
+                  <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-qz-accent text-sm font-bold text-qz-accent-ink">
                     {initial}
                   </div>
 
                   <div className="min-w-0">
-                    <p className="truncate text-sm font-semibold text-zinc-900">
+                    <p className="truncate text-sm font-semibold text-qz-text">
                       {businessName}
                     </p>
 
-                    <p className="mt-0.5 text-xs text-zinc-500">
+                    <p className="mt-0.5 text-[11px] text-qz-text-3">
                       Business Account
                     </p>
                   </div>
@@ -506,7 +514,7 @@ export default function DashboardHeader({
               <Link
                 href="#"
                 onClick={() => setMenuOpen(false)}
-                className="flex items-center gap-3 px-3 text-sm font-medium text-zinc-500 transition hover:text-zinc-900"
+                className="flex items-center gap-3 rounded-xl px-3 py-2 text-sm font-medium text-qz-text-2 transition hover:bg-white/5 hover:text-qz-text"
               >
                 <HelpIcon />
                 <span>Help &amp; Support</span>

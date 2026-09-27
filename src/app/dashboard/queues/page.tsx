@@ -8,7 +8,7 @@ import { getOrCreateQueueSession } from "@/lib/queueSession";
 
 function QueueIcon() {
   return (
-    <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-emerald-50 text-emerald-600">
+    <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-qz-accent-soft text-emerald-400">
       <svg
         width="20"
         height="20"
@@ -31,14 +31,14 @@ function QueueIcon() {
 
 function getStatusClasses(status: string) {
   if (status === "active") {
-    return "bg-emerald-50 text-emerald-700";
+    return "bg-qz-accent-soft text-emerald-300 ring-1 ring-inset ring-emerald-500/25";
   }
 
   if (status === "paused") {
-    return "bg-amber-50 text-amber-700";
+    return "bg-amber-500/12 text-amber-400 ring-1 ring-inset ring-amber-500/25";
   }
 
-  return "bg-zinc-100 text-zinc-600";
+  return "bg-white/[0.08] text-qz-text-2 ring-1 ring-inset ring-white/10";
 }
 
 function getStatusLabel(status: string) {
@@ -121,32 +121,32 @@ export default async function QueuesPage() {
   ).length;
 
   return (
-    <section className="p-6 sm:p-8 lg:p-10">
+    <section className="mx-auto max-w-[1500px] px-5 py-6 sm:px-8 sm:py-8 lg:px-10">
       {/* Page Header */}
       <header className="flex flex-col gap-6 sm:flex-row sm:items-end sm:justify-between">
         <div>
-          <h1 className="text-3xl font-semibold tracking-tight text-zinc-950">
+          <h1 className="text-3xl font-semibold tracking-[-0.03em] text-white">
             Queues
           </h1>
 
-          <p className="mt-2 text-sm text-zinc-500">
+          <p className="mt-2 text-sm text-qz-text-2">
             Manage and monitor all your queues.
           </p>
 
-          <div className="mt-4 flex items-center gap-2 text-xs font-medium text-zinc-500">
+          <div className="mt-4 flex items-center gap-2 text-xs font-medium text-qz-text-2">
             <span>
               {queues.length} {queues.length === 1 ? "queue" : "queues"}
             </span>
 
-            <span className="text-zinc-300">·</span>
+            <span className="text-qz-text-3">·</span>
 
-            <span className="text-emerald-600">{activeQueueCount} active</span>
+            <span className="text-emerald-400">{activeQueueCount} active</span>
           </div>
         </div>
 
         <Link
           href="/dashboard/queues/new"
-          className="inline-flex h-11 w-fit items-center gap-2 rounded-xl bg-zinc-950 px-5 text-sm font-medium text-white shadow-sm transition hover:bg-zinc-800"
+          className="inline-flex h-11 w-fit items-center gap-2 rounded-xl bg-qz-accent px-5 text-sm font-semibold text-qz-accent-ink transition hover:bg-qz-accent-strong"
         >
           <span className="text-base leading-none">+</span>
           Create Queue
@@ -156,22 +156,22 @@ export default async function QueuesPage() {
       {/* Queue List */}
       <div className="mt-8 space-y-4">
         {queues.length === 0 ? (
-          <div className="rounded-2xl border border-dashed border-zinc-200 bg-white p-10 text-center shadow-sm">
-            <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-xl bg-zinc-100">
+          <div className="rounded-2xl border border-dashed border-qz-line bg-qz-surface p-10 text-center">
+            <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-xl bg-white/[0.08]">
               <QueueIcon />
             </div>
 
-            <h2 className="mt-4 text-base font-semibold text-zinc-900">
+            <h2 className="mt-4 text-base font-semibold text-qz-text">
               No queues yet
             </h2>
 
-            <p className="mt-1 text-sm text-zinc-500">
+            <p className="mt-1 text-sm text-qz-text-2">
               Create your first queue to start serving customers.
             </p>
 
             <Link
               href="/dashboard/queues/new"
-              className="mt-5 inline-flex rounded-xl bg-zinc-950 px-4 py-2.5 text-sm font-medium text-white transition hover:bg-zinc-800"
+              className="mt-5 inline-flex rounded-xl bg-qz-accent px-4 py-2.5 text-sm font-semibold text-qz-accent-ink transition hover:bg-qz-accent-strong"
             >
               Create Queue
             </Link>
@@ -184,7 +184,7 @@ export default async function QueuesPage() {
               return (
                 <div
                   key={queue._id.toString()}
-                  className="rounded-2xl border border-zinc-200 bg-white p-4 shadow-sm transition hover:border-zinc-300 hover:shadow-md sm:p-5"
+                  className="rounded-2xl border border-qz-line bg-qz-surface p-4 transition hover:border-qz-line-strong sm:p-5"
                 >
                   <div className="flex flex-col gap-4 lg:flex-row lg:items-center">
                     {/* Queue Identity */}
@@ -193,7 +193,7 @@ export default async function QueuesPage() {
 
                       <div className="min-w-0">
                         <div className="flex flex-wrap items-center gap-2">
-                          <h2 className="truncate text-sm font-semibold text-zinc-950">
+                          <h2 className="truncate text-sm font-semibold text-qz-text">
                             {queue.name}
                           </h2>
 
@@ -206,56 +206,56 @@ export default async function QueuesPage() {
                           </span>
                         </div>
 
-                        <p className="mt-1 truncate text-xs text-zinc-500">
+                        <p className="mt-1 truncate text-xs text-qz-text-2">
                           /{queue.slug}
                         </p>
                       </div>
                     </div>
 
                     {/* Queue Stats */}
-                    <div className="grid grid-cols-2 gap-x-8 gap-y-3 border-t border-zinc-100 pt-4 sm:grid-cols-4 sm:gap-x-10 sm:border-t-0 sm:pt-0 lg:min-w-[430px]">
+                    <div className="grid grid-cols-2 gap-x-8 gap-y-3 border-t border-qz-line pt-4 sm:grid-cols-4 sm:gap-x-10 sm:border-t-0 sm:pt-0 lg:min-w-[430px]">
                       <div>
-                        <p className="text-[11px] text-zinc-500">Waiting</p>
+                        <p className="text-[11px] text-qz-text-2">Waiting</p>
 
-                        <p className="mt-0.5 text-sm font-semibold text-zinc-900">
+                        <p className="mt-0.5 text-sm font-semibold text-qz-text">
                           {waiting}
                         </p>
                       </div>
 
                       <div>
-                        <p className="text-[11px] text-zinc-500">Serving</p>
+                        <p className="text-[11px] text-qz-text-2">Serving</p>
 
-                        <p className="mt-0.5 text-sm font-semibold text-zinc-900">
+                        <p className="mt-0.5 text-sm font-semibold text-qz-text">
                           {serving ? `#${serving.tokenNumber}` : "—"}
                         </p>
                       </div>
 
                       <div>
-                        <p className="text-[11px] text-zinc-500">
+                        <p className="text-[11px] text-qz-text-2">
                           Served Today
                         </p>
 
-                        <p className="mt-0.5 text-sm font-semibold text-zinc-900">
+                        <p className="mt-0.5 text-sm font-semibold text-qz-text">
                           {servedToday}
                         </p>
                       </div>
 
                       <div>
-                        <p className="text-[11px] text-zinc-500">
+                        <p className="text-[11px] text-qz-text-2">
                           Current Token
                         </p>
 
-                        <p className="mt-0.5 text-sm font-semibold text-zinc-900">
+                        <p className="mt-0.5 text-sm font-semibold text-qz-text">
                           {queueSession ? `#${queueSession.currentToken}` : "—"}
                         </p>
                       </div>
                     </div>
 
                     {/* Action */}
-                    <div className="flex justify-end border-t border-zinc-100 pt-3 lg:min-w-[120px] lg:border-t-0 lg:pt-0">
+                    <div className="flex justify-end border-t border-qz-line pt-3 lg:min-w-[120px] lg:border-t-0 lg:pt-0">
                       <Link
                         href={`/dashboard/queue/${queue._id.toString()}`}
-                        className="text-sm font-medium text-zinc-700 transition hover:text-zinc-950"
+                        className="text-sm font-medium text-qz-text-2 transition hover:text-qz-text"
                       >
                         Open Queue →
                       </Link>

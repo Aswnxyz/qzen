@@ -33,18 +33,18 @@ const statusOptions: Array<{
 
 function getStatusClasses(status: CustomerStatus) {
   if (status === "waiting") {
-    return "bg-amber-50 text-amber-700";
+    return "bg-amber-500/12 text-amber-400 ring-1 ring-inset ring-amber-500/25";
   }
 
   if (status === "serving") {
-    return "bg-blue-50 text-blue-700";
+    return "bg-blue-500/12 text-blue-400 ring-1 ring-inset ring-blue-500/25";
   }
 
   if (status === "completed") {
-    return "bg-emerald-50 text-emerald-700";
+    return "bg-qz-accent-soft text-emerald-300 ring-1 ring-inset ring-emerald-500/25";
   }
 
-  return "bg-red-50 text-red-700";
+  return "bg-red-500/12 text-red-400 ring-1 ring-inset ring-red-500/25";
 }
 
 function getStatusLabel(status: CustomerStatus) {
@@ -88,14 +88,14 @@ export default function CustomersTable({
   }, [customers, statusFilter]);
 
   return (
-    <div className="overflow-hidden rounded-2xl border border-zinc-200 bg-white shadow-sm">
-      <div className="flex flex-col gap-4 border-b border-zinc-100 p-5 sm:flex-row sm:items-center sm:justify-between">
+    <div className="overflow-hidden rounded-2xl border border-qz-line bg-qz-surface">
+      <div className="flex flex-col gap-4 border-b border-qz-line p-5 sm:flex-row sm:items-center sm:justify-between">
         <div>
-          <h2 className="text-base font-semibold text-zinc-950">
+          <h2 className="text-base font-semibold text-qz-text">
             {isToday ? "Today's Customers" : "Customer History"}
           </h2>
 
-          <p className="mt-1 text-xs text-zinc-500">
+          <p className="mt-1 text-xs text-qz-text-2">
             {isToday
               ? "Customer activity from today's queue sessions."
               : `Customer activity from ${new Intl.DateTimeFormat("en-IN", {
@@ -115,7 +115,7 @@ export default function CustomersTable({
           onChange={(event) =>
             setStatusFilter(event.target.value as "all" | CustomerStatus)
           }
-          className="h-10 rounded-xl border border-zinc-200 bg-white px-3 text-sm text-zinc-700 outline-none transition focus:border-zinc-400"
+          className="h-10 rounded-xl border border-qz-line-strong bg-qz-surface-2 px-3 text-sm text-qz-text-2 outline-none transition focus:border-qz-accent"
           aria-label="Filter customers by status"
         >
           {statusOptions.map((option) => (
@@ -128,7 +128,7 @@ export default function CustomersTable({
 
       {filteredCustomers.length === 0 ? (
         <div className="p-10 text-center">
-          <h3 className="text-sm font-semibold text-zinc-900">
+          <h3 className="text-sm font-semibold text-qz-text">
             {customers.length === 0
               ? isToday
                 ? "No customers today"
@@ -136,7 +136,7 @@ export default function CustomersTable({
               : "No customers match this filter"}
           </h3>
 
-          <p className="mt-1 text-sm text-zinc-500">
+          <p className="mt-1 text-sm text-qz-text-2">
             {customers.length === 0
               ? isToday
                 ? "Customers who join your queues will appear here."
@@ -148,8 +148,8 @@ export default function CustomersTable({
         <>
           <div className="hidden overflow-x-auto md:block">
             <table className="w-full text-left">
-              <thead className="border-b border-zinc-100 bg-zinc-50/70">
-                <tr className="text-xs font-medium text-zinc-500">
+              <thead className="border-b border-qz-line bg-white/[0.04]">
+                <tr className="text-xs font-medium text-qz-text-2">
                   <th className="px-5 py-3">Customer</th>
                   <th className="px-5 py-3">Token</th>
                   <th className="px-5 py-3">Queue</th>
@@ -159,18 +159,18 @@ export default function CustomersTable({
                 </tr>
               </thead>
 
-              <tbody className="divide-y divide-zinc-100">
+              <tbody className="divide-y divide-qz-line">
                 {filteredCustomers.map((customer) => (
                   <tr key={customer.id} className="text-sm">
-                    <td className="px-5 py-4 font-medium text-zinc-900">
+                    <td className="px-5 py-4 font-medium text-qz-text">
                       {customer.customerName}
                     </td>
 
-                    <td className="px-5 py-4 font-medium text-zinc-700">
+                    <td className="px-5 py-4 font-medium text-qz-text-2">
                       #{customer.tokenNumber}
                     </td>
 
-                    <td className="px-5 py-4 text-zinc-600">
+                    <td className="px-5 py-4 text-qz-text-2">
                       {customer.queueName}
                     </td>
 
@@ -184,11 +184,11 @@ export default function CustomersTable({
                       </span>
                     </td>
 
-                    <td className="px-5 py-4 text-zinc-500">
+                    <td className="px-5 py-4 text-qz-text-2">
                       {formatTime(customer.joinedAt)}
                     </td>
 
-                    <td className="px-5 py-4 text-zinc-500">
+                    <td className="px-5 py-4 text-qz-text-2">
                       {customer.completedAt
                         ? formatTime(customer.completedAt)
                         : "—"}
@@ -199,16 +199,16 @@ export default function CustomersTable({
             </table>
           </div>
 
-          <div className="divide-y divide-zinc-100 md:hidden">
+          <div className="divide-y divide-qz-line md:hidden">
             {filteredCustomers.map((customer) => (
               <div key={customer.id} className="p-5">
                 <div className="flex items-start justify-between gap-4">
                   <div className="min-w-0">
-                    <p className="truncate font-medium text-zinc-900">
+                    <p className="truncate font-medium text-qz-text">
                       {customer.customerName}
                     </p>
 
-                    <p className="mt-1 text-xs text-zinc-500">
+                    <p className="mt-1 text-xs text-qz-text-2">
                       #{customer.tokenNumber} · {customer.queueName}
                     </p>
                   </div>
@@ -224,15 +224,15 @@ export default function CustomersTable({
 
                 <div className="mt-4 grid grid-cols-2 gap-4 text-xs">
                   <div>
-                    <p className="text-zinc-400">Joined</p>
-                    <p className="mt-1 font-medium text-zinc-700">
+                    <p className="text-qz-text-3">Joined</p>
+                    <p className="mt-1 font-medium text-qz-text-2">
                       {formatTime(customer.joinedAt)}
                     </p>
                   </div>
 
                   <div>
-                    <p className="text-zinc-400">Served</p>
-                    <p className="mt-1 font-medium text-zinc-700">
+                    <p className="text-qz-text-3">Served</p>
+                    <p className="mt-1 font-medium text-qz-text-2">
                       {customer.completedAt
                         ? formatTime(customer.completedAt)
                         : "—"}
@@ -246,7 +246,7 @@ export default function CustomersTable({
       )}
 
       {filteredCustomers.length > 0 && (
-        <div className="border-t border-zinc-100 px-5 py-3 text-xs text-zinc-400">
+        <div className="border-t border-qz-line px-5 py-3 text-xs text-qz-text-3">
           Showing {filteredCustomers.length} of {customers.length} customers
         </div>
       )}

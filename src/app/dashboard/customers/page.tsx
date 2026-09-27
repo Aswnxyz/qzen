@@ -107,15 +107,15 @@ export default async function CustomersPage({
   const formattedDate = formatDate(selectedDate);
 
   return (
-    <section className="p-6 sm:p-8 lg:p-10">
+    <section className="mx-auto max-w-[1500px] px-5 py-6 sm:px-8 sm:py-8 lg:px-10">
       <header>
         <div className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
           <div>
-            <h1 className="text-3xl font-semibold tracking-tight text-zinc-950">
+            <h1 className="text-3xl font-semibold tracking-[-0.03em] text-white">
               Customers
             </h1>
 
-            <p className="mt-2 text-sm text-zinc-500">
+            <p className="mt-2 text-sm text-qz-text-2">
               View and manage customers across your queues.
             </p>
           </div>
@@ -132,8 +132,8 @@ export default async function CustomersPage({
             href="/dashboard/customers"
             className={`rounded-full px-3 py-1.5 text-xs font-medium transition ${
               isToday
-                ? "bg-zinc-950 text-white"
-                : "bg-zinc-100 text-zinc-600 hover:bg-zinc-200"
+                ? "bg-qz-accent text-qz-accent-ink"
+                : "bg-white/[0.08] text-qz-text-2 hover:bg-white/10"
             }`}
           >
             Today
@@ -141,15 +141,15 @@ export default async function CustomersPage({
 
           <a
             href={`/dashboard/customers?date=${yesterdayDateKey}`}
-            className="rounded-full bg-zinc-100 px-3 py-1.5 text-xs font-medium text-zinc-600 transition hover:bg-zinc-200"
+            className="rounded-full bg-white/[0.08] px-3 py-1.5 text-xs font-medium text-qz-text-2 transition hover:bg-white/10"
           >
             Yesterday
           </a>
 
-          <span className="text-xs text-zinc-400">Showing {formattedDate}</span>
+          <span className="text-xs text-qz-text-3">Showing {formattedDate}</span>
         </div>
 
-        <p className="mt-4 text-xs font-medium text-zinc-500">
+        <p className="mt-4 text-xs font-medium text-qz-text-2">
           {customers.length} {customers.length === 1 ? "customer" : "customers"}{" "}
           {isToday ? "today" : `on ${formattedDate}`}
         </p>

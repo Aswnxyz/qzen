@@ -27,7 +27,7 @@ export default async function DashboardLayout({
   }
 
   return (
-    <div className="min-h-screen bg-zinc-50 lg:flex lg:h-screen lg:overflow-hidden">
+    <div className="qz-dash min-h-screen bg-qz-bg text-qz-text lg:flex lg:h-screen lg:overflow-hidden">
       <DashboardSidebar businessName={business.name} />
 
       <div className="flex min-w-0 flex-1 flex-col lg:min-h-0">

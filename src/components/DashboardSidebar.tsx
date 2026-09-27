@@ -117,11 +117,11 @@ function HelpIcon() {
 }
 
 function navigationItemClasses(active = false) {
-  return `flex items-center gap-3 rounded-xl px-4 py-3 text-sm font-medium transition ${
-    active
-      ? "bg-emerald-50 text-emerald-800"
-      : "text-zinc-500 hover:bg-zinc-50 hover:text-zinc-900"
-  }`;
+  if (active) {
+    return "flex items-center gap-3 rounded-xl bg-qz-accent-soft px-4 py-2.5 text-sm font-semibold text-emerald-300 shadow-[inset_0_1px_0_0_rgba(255,255,255,0.06)] ring-1 ring-inset ring-emerald-500/25 transition";
+  }
+
+  return "flex items-center gap-3 rounded-xl px-4 py-2.5 text-sm font-medium text-qz-text-2 transition hover:bg-white/5 hover:text-qz-text";
 }
 
 export default function DashboardSidebar({
@@ -151,23 +151,23 @@ export default function DashboardSidebar({
     pathname.startsWith("/dashboard/settings/");
 
   return (
-    <aside className="hidden w-[264px] shrink-0 border-r border-zinc-200 bg-white lg:flex lg:min-h-screen lg:flex-col">
+    <aside className="hidden w-[268px] shrink-0 flex-col border-r border-qz-line bg-qz-raise lg:flex lg:min-h-screen">
       {/* Brand */}
-      <div className="px-8 pt-7">
+      <div className="px-6 pb-6 pt-7">
         <Link
           href="/dashboard"
-          className="text-3xl font-bold tracking-tight text-zinc-950"
+          className="inline-flex items-baseline text-[26px] font-bold tracking-[-0.04em] text-white"
         >
-          Q<span className="text-emerald-600">z</span>en
+          Q<span className="text-qz-accent">z</span>en
         </Link>
 
-        <p className="mt-1 text-xs text-zinc-400">
+        <p className="mt-1.5 text-[10px] font-semibold uppercase tracking-[0.18em] text-qz-text-3">
           Join. Relax. Get Served.
         </p>
       </div>
 
       {/* Navigation */}
-      <nav className="mt-8 px-4">
+      <nav className="px-4">
         <div className="space-y-1">
           <Link
             href="/dashboard"
@@ -212,20 +212,20 @@ export default function DashboardSidebar({
       </nav>
 
       {/* Bottom */}
-      <div className="mt-auto space-y-5 px-5 pb-6">
+      <div className="mt-auto space-y-3 border-t border-qz-line px-4 pb-5 pt-4">
         {/* Business Account */}
-        <div className="rounded-2xl border border-zinc-100 bg-zinc-50 p-4">
+        <div className="rounded-2xl border border-qz-line bg-qz-surface p-3.5">
           <div className="flex items-center gap-3">
-            <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-amber-50 text-sm font-semibold text-amber-700">
+            <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-qz-accent text-sm font-bold text-qz-accent-ink">
               {businessName.charAt(0).toUpperCase()}
             </div>
 
             <div className="min-w-0">
-              <p className="truncate text-sm font-semibold text-zinc-900">
+              <p className="truncate text-sm font-semibold text-qz-text">
                 {businessName}
               </p>
 
-              <p className="mt-0.5 text-xs text-zinc-500">
+              <p className="mt-0.5 text-[11px] text-qz-text-3">
                 Business Account
               </p>
             </div>
@@ -235,7 +235,7 @@ export default function DashboardSidebar({
         {/* Help */}
         <Link
           href="#"
-          className="flex items-center gap-3 px-3 text-sm font-medium text-zinc-500 transition hover:text-zinc-900"
+          className="flex items-center gap-3 rounded-xl px-3 py-2 text-sm font-medium text-qz-text-2 transition hover:bg-white/5 hover:text-qz-text"
         >
           <HelpIcon />
           <span>Help &amp; Support</span>
