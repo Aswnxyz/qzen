@@ -1,29 +1,95 @@
 "use client";
 
-import { FormEvent, useEffect, useState } from "react";
+import {
+  FormEvent,
+  useEffect,
+  useState,
+  useSyncExternalStore,
+} from "react";
 import { io } from "socket.io-client";
+import { motion } from "motion/react";
+import QueueTicket, {
+  QueueTicketSkeleton,
+  type TicketStatus,
+} from "@/components/customer/QueueTicket";
+import { Field } from "@/components/customer/ui";
+import {
+  cardClass,
+  eyebrowClass,
+  errorClass,
+  fadeUp,
+  headingClass,
+  inputClass,
+  primaryButtonClass,
+} from "@/components/customer/styles";
 
 interface JoinQueueFormProps {
   queueId: string;
   queueStatus: string;
+  businessName: string;
+  queueName: string;
+}
+
+/**
+ * localStorage is not a reactive store: every write below is paired with a
+ * state update, which makes React re-read the snapshot, so there is nothing to
+ * subscribe to. React only requires the function to exist (and to be stable).
+ */
+const subscribeToTicketStorage = () => () => {};
+
+/**
+ * Every ticket read goes through this.
+ *
+ * localStorage throws a SecurityError when it is blocked — a third-party
+ * frame, "block all cookies", or a restrictive webview. A customer who cannot
+ * store a ticket must still get the queue, so an unreadable store degrades to
+ * "no saved ticket" rather than taking the page down.
+ */
+function readSavedTicket(queueId: string): string | null {
+  try {
+    return localStorage.getItem(`qzen-ticket-${queueId}`);
+  } catch {
+    return null;
+  }
 }
 
 export default function JoinQueueForm({
   queueId,
   queueStatus,
+  businessName,
+  queueName,
 }: JoinQueueFormProps) {
   const [customerName, setCustomerName] = useState("");
   const [isJoining, setIsJoining] = useState(false);
   const [error, setError] = useState("");
 
-  const [entryId, setEntryId] = useState<string | null>(() => {
-    if (typeof window === "undefined") {
-      return null;
-    }
-
-    return localStorage.getItem(`qzen-ticket-${queueId}`);
-  });
+  const [entryId, setEntryId] = useState<string | null>(() =>
+    typeof window === "undefined" ? null : readSavedTicket(queueId),
+  );
   const [tokenNumber, setTokenNumber] = useState<number | null>(null);
+
+  // The ticket lives in localStorage, but this component is server rendered,
+  // so the first paint must not depend on it. React reports the *server*
+  // snapshot during SSR and hydration — `undefined` — then swaps in the
+  // device's value on the next render. That handover is what `checked` waits
+  // for: until it resolves we render the ticket silhouette rather than the
+  // join form, so a returning customer never sees an empty form they could
+  // submit a second time, while the hydrated markup still matches the HTML
+  // the server sent.
+  const savedTicketId = useSyncExternalStore(
+    subscribeToTicketStorage,
+    (): string | null | undefined => readSavedTicket(queueId),
+    (): string | null | undefined => undefined,
+  );
+  const checked = savedTicketId !== undefined;
+
+  // Read lazily rather than in an effect: a device that already holds a ticket
+  // starts out restoring, so we fetch its status before swapping the
+  // silhouette for the ticket. `fetchStatus` clears it in its `finally` block
+  // on every path, so this can never strand a customer on the silhouette.
+  const [restoring, setRestoring] = useState(
+    () => typeof window !== "undefined" && readSavedTicket(queueId) !== null,
+  );
 
   const [currentToken, setCurrentToken] = useState<number | null>(null);
   const [peopleAhead, setPeopleAhead] = useState<number | null>(null);
@@ -73,6 +139,8 @@ export default function JoinQueueForm({
         setCurrentQueueStatus(data.queueStatus);
       } catch (error) {
         console.error("Queue status error:", error);
+      } finally {
+        setRestoring(false);
       }
     }
 
@@ -136,7 +204,13 @@ export default function JoinQueueForm({
       const newEntryId = data.entry._id;
       const newToken = data.entry.tokenNumber;
 
-      localStorage.setItem(`qzen-ticket-${queueId}`, newEntryId);
+      try {
+        localStorage.setItem(`qzen-ticket-${queueId}`, newEntryId);
+      } catch {
+        // Storage is blocked: the ticket still works for this session, it
+        // simply cannot survive a reload. Swallowing this keeps a successful
+        // join from reporting a failure the customer did not cause.
+      }
 
       setEntryId(newEntryId);
       setTokenNumber(newToken);
@@ -148,171 +222,121 @@ export default function JoinQueueForm({
     }
   }
 
+  // ── Render ──────────────────────────────────────────────────────────
+
+  if (!checked || restoring) {
+    return <QueueTicketSkeleton />;
+  }
+
   if (entryId !== null && tokenNumber !== null) {
-    if (customerStatus === "skipped") {
-      return (
-        <div className="mt-8 text-center">
-          <p className="text-sm font-medium uppercase tracking-widest text-zinc-400">
-            Your ticket
-          </p>
-
-          <p className="mt-6 text-sm text-zinc-500">Your token</p>
-
-          <p className="mt-2 text-7xl font-bold tracking-tight text-zinc-900">
-            #{tokenNumber}
-          </p>
-
-          <div className="mt-10 rounded-2xl bg-amber-50 p-6">
-            <p className="text-lg font-semibold text-zinc-900">
-              Your turn was skipped.
-            </p>
-
-            <p className="mt-2 text-sm text-zinc-600">
-              Please contact the staff if you believe this was a mistake.
-            </p>
-          </div>
-        </div>
-      );
-    }
-
-    if (customerStatus === "completed") {
-      return (
-        <div className="mt-8 text-center">
-          <p className="text-sm font-medium uppercase tracking-widest text-zinc-400">
-            Visit complete
-          </p>
-
-          <p className="mt-6 text-sm text-zinc-500">Your token</p>
-
-          <p className="mt-2 text-7xl font-bold tracking-tight text-zinc-900">
-            #{tokenNumber}
-          </p>
-
-          <div className="mt-10 rounded-2xl bg-zinc-50 p-6">
-            <p className="text-lg font-semibold text-zinc-900">
-              Your visit is complete.
-            </p>
-
-            <p className="mt-2 text-sm text-zinc-600">
-              Thank you for using Qzen.
-            </p>
-          </div>
-        </div>
-      );
-    }
+    const ticketStatus: TicketStatus =
+      customerStatus === "serving" ||
+      customerStatus === "skipped" ||
+      customerStatus === "completed"
+        ? customerStatus
+        : "waiting";
 
     return (
-      <div className="mt-8 text-center">
-        <p className="text-sm font-medium uppercase tracking-widest text-zinc-400">
-          You&apos;re in!
-        </p>
-
-        <p className="mt-6 text-sm text-zinc-500">Your token</p>
-
-        <p className="mt-2 text-7xl font-bold tracking-tight text-zinc-900">
-          #{tokenNumber}
-        </p>
-
-        <div className="mt-10 grid grid-cols-2 gap-4">
-          <div className="rounded-2xl bg-zinc-50 p-5">
-            <p className="text-sm text-zinc-500">Now serving</p>
-
-            <p className="mt-2 text-2xl font-bold text-zinc-900">
-              {currentToken !== null ? `#${currentToken}` : "..."}
-            </p>
-          </div>
-
-          <div className="rounded-2xl bg-zinc-50 p-5">
-            <p className="text-sm text-zinc-500">People ahead</p>
-
-            <p className="mt-2 text-2xl font-bold text-zinc-900">
-              {peopleAhead !== null ? peopleAhead : "..."}
-            </p>
-          </div>
-        </div>
-
-        <div className="mt-4 rounded-2xl bg-zinc-50 p-5">
-          <p className="text-sm text-zinc-500">Estimated wait</p>
-
-          <p className="mt-2 text-2xl font-bold text-zinc-900">
-            {estimatedWait !== null ? `${estimatedWait} min` : "..."}
-          </p>
-        </div>
-
-        <p className="mt-8 text-zinc-600">
-          {customerStatus === "serving"
-            ? "It's your turn!"
-            : "You can relax while you wait."}
-        </p>
-      </div>
+      <QueueTicket
+        businessName={businessName}
+        queueName={queueName}
+        tokenNumber={tokenNumber}
+        currentToken={currentToken}
+        peopleAhead={peopleAhead}
+        estimatedWait={estimatedWait}
+        status={ticketStatus}
+      />
     );
   }
 
-  if (currentQueueStatus === "paused") {
+  if (currentQueueStatus === "paused" || currentQueueStatus === "closed") {
+    const paused = currentQueueStatus === "paused";
+
     return (
-      <div className="mt-8 rounded-2xl bg-amber-50 p-6 text-center">
-        <p className="text-sm font-semibold uppercase tracking-widest text-amber-600">
-          Queue Paused
-        </p>
+      <motion.section {...fadeUp(0.05)} className={cardClass}>
+        <div className="text-center">
+          <p className={eyebrowClass}>{businessName}</p>
+          <h1 className={`mt-3 ${headingClass}`}>{queueName}</h1>
+        </div>
 
-        <p className="mt-3 text-lg font-semibold text-zinc-900">
-          This queue is temporarily paused.
-        </p>
+        <div
+          className={`mt-7 rounded-2xl border px-5 py-5 ${
+            paused
+              ? "border-amber-200 bg-amber-50"
+              : "border-red-200 bg-red-50"
+          }`}
+          role="status"
+        >
+          <p
+            className={`font-mono text-[10px] font-semibold uppercase tracking-[0.2em] ${
+              paused ? "text-amber-700" : "text-red-700"
+            }`}
+          >
+            {paused ? "Queue paused" : "Queue closed"}
+          </p>
 
-        <p className="mt-2 text-sm text-zinc-600">
-          New customers cannot join right now. Please try again later.
-        </p>
-      </div>
-    );
-  }
+          <p className="mt-3 text-[16px] font-semibold leading-snug text-ink-text">
+            {paused
+              ? "This queue is temporarily paused."
+              : "This queue is currently closed."}
+          </p>
 
-  if (currentQueueStatus === "closed") {
-    return (
-      <div className="mt-8 rounded-2xl bg-red-50 p-6 text-center">
-        <p className="text-sm font-semibold uppercase tracking-widest text-red-600">
-          Queue Closed
-        </p>
-
-        <p className="mt-3 text-lg font-semibold text-zinc-900">
-          This queue is currently closed.
-        </p>
-
-        <p className="mt-2 text-sm text-zinc-600">
-          New customers cannot join this queue right now.
-        </p>
-      </div>
+          <p className="mt-2 text-[13.5px] leading-[1.6] text-ink-text-2">
+            {paused
+              ? "New customers cannot join right now. Please try again later."
+              : "New customers cannot join this queue right now."}
+          </p>
+        </div>
+      </motion.section>
     );
   }
 
   return (
-    <form onSubmit={handleSubmit} className="mt-8 space-y-5">
-      <div>
-        <label
-          htmlFor="customerName"
-          className="text-sm font-medium text-zinc-700"
-        >
-          Your name
-        </label>
+    <motion.section {...fadeUp(0.05)} className={cardClass}>
+      <motion.div {...fadeUp(0.12)} className="text-center">
+        <p className={eyebrowClass}>{businessName}</p>
+        <h1 className={`mt-3 ${headingClass}`}>{queueName}</h1>
+        <p className="mt-2.5 text-[15px] leading-6 text-ink-text-2">
+          Join from your phone — it only takes a moment.
+        </p>
+      </motion.div>
 
-        <input
-          id="customerName"
-          type="text"
-          value={customerName}
-          onChange={(event) => setCustomerName(event.target.value)}
-          placeholder="Enter your name"
-          className="mt-2 w-full rounded-xl border border-zinc-300 px-4 py-3 outline-none transition focus:border-zinc-900"
-        />
-      </div>
+      <motion.div {...fadeUp(0.2)} className="mt-7">
+        <form onSubmit={handleSubmit} className="space-y-5">
+          <Field id="customerName" label="Your name">
+            <input
+              id="customerName"
+              type="text"
+              value={customerName}
+              onChange={(event) => setCustomerName(event.target.value)}
+              placeholder="Enter your name"
+              autoComplete="name"
+              className={inputClass}
+            />
+          </Field>
 
-      {error && <p className="text-sm text-red-600">{error}</p>}
+          {error && (
+            <p role="alert" className={errorClass}>
+              {error}
+            </p>
+          )}
 
-      <button
-        type="submit"
-        disabled={isJoining}
-        className="w-full rounded-full bg-black px-6 py-3 font-medium text-white transition hover:bg-zinc-800 disabled:cursor-not-allowed disabled:opacity-50"
+          <button
+            type="submit"
+            disabled={isJoining}
+            className={primaryButtonClass}
+          >
+            {isJoining ? "Joining…" : "Join Queue"}
+          </button>
+        </form>
+      </motion.div>
+
+      <motion.p
+        {...fadeUp(0.28)}
+        className="mt-5 text-center text-[12.5px] leading-6 text-ink-text-3"
       >
-        {isJoining ? "Joining..." : "Join Queue"}
-      </button>
-    </form>
+        No app needed — your ticket opens right here.
+      </motion.p>
+    </motion.section>
   );
 }

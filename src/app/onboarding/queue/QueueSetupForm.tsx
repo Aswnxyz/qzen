@@ -2,6 +2,17 @@
 
 import { FormEvent, useState } from "react";
 import { useRouter } from "next/navigation";
+import { motion } from "motion/react";
+import CustomerShell from "@/components/customer/CustomerShell";
+import {
+  cardClass,
+  errorClass,
+  fadeUp,
+  headingClass,
+  inputClass,
+  labelClass,
+  primaryButtonClass,
+} from "@/components/customer/styles";
 
 export default function QueueSetupPage() {
   const router = useRouter();
@@ -53,131 +64,102 @@ export default function QueueSetupPage() {
   }
 
   return (
-    <main className="relative flex min-h-screen overflow-hidden bg-qzen-surface-muted px-5 py-6 sm:px-8 sm:py-8">
-      {/* Background atmosphere */}
-      <div
-        aria-hidden="true"
-        className="pointer-events-none absolute -right-40 -top-40 h-96 w-96 rounded-full bg-emerald-100/50 blur-3xl"
-      />
+    <CustomerShell
+      headerRight={
+        <div className="flex shrink-0 items-center gap-3 text-[13px] text-ink-text-3">
+          <span className="hidden font-mono uppercase tracking-[0.16em] sm:inline">
+            Setup
+          </span>
 
-      <div
-        aria-hidden="true"
-        className="pointer-events-none absolute -bottom-48 -left-40 h-96 w-96 rounded-full bg-emerald-50 blur-3xl"
-      />
+          <span className="font-mono">01</span>
 
-      <div className="relative mx-auto flex w-full max-w-7xl flex-1 flex-col">
-        {/* Header */}
-        <header className="flex items-center justify-between">
-          <div>
-            <p className="text-xl font-bold tracking-[-0.04em] text-qzen-text">
-              Qzen
-            </p>
-          </div>
+          <span className="font-mono">/</span>
 
-          <div className="flex items-center gap-3 text-sm text-qzen-text-secondary">
-            <span className="hidden sm:inline">Setup</span>
-
-            <span className="text-qzen-text-subtle">
-              01
-            </span>
-
-            <span className="text-qzen-text-subtle">/</span>
-
-            <span className="font-semibold text-qzen-brand">
-              02
-            </span>
-          </div>
-        </header>
-
-        {/* Main content */}
-        <div className="flex flex-1 items-center justify-center py-14 sm:py-10">
-          <section className="w-full max-w-xl -translate-y-2 sm:-translate-y-4">
-            {/* Intro */}
-            <div className="text-center">
-              <div className="mx-auto inline-flex items-center gap-2 rounded-full border border-qzen-border bg-qzen-surface px-3 py-1.5 text-xs font-semibold uppercase tracking-[0.16em] text-qzen-brand-strong">
-                <span className="h-1.5 w-1.5 rounded-full bg-qzen-accent" />
-                Step 2 of 2
-              </div>
-
-              <h1 className="mt-6 text-4xl font-bold tracking-[-0.05em] text-qzen-text sm:text-5xl">
-                Create your first queue
-              </h1>
-
-              <p className="mx-auto mt-4 max-w-md text-base leading-7 text-qzen-text-secondary sm:text-lg">
-                Give your queue a name so customers and staff know
-                what it is for.
-              </p>
-            </div>
-
-            {/* Form card */}
-            <div className="mt-10 rounded-qzen-xl border border-qzen-border bg-qzen-surface p-6 shadow-qzen-lg sm:p-8">
-              <form onSubmit={handleSubmit} className="space-y-6">
-                <div>
-                  <label
-                    htmlFor="queueName"
-                    className="text-sm font-semibold text-qzen-text"
-                  >
-                    Queue name
-                  </label>
-
-                  <p className="mt-1 text-sm text-qzen-text-subtle">
-                    This is what customers will see when they join.
-                  </p>
-
-                  <input
-                    id="queueName"
-                    type="text"
-                    value={queueName}
-                    onChange={(event) =>
-                      setQueueName(event.target.value)
-                    }
-                    required
-                    autoComplete="off"
-                    placeholder="e.g. General Consultation"
-                    className="mt-3 w-full rounded-qzen-md border border-qzen-border-strong bg-qzen-surface px-4 py-3.5 text-qzen-text outline-none transition placeholder:text-qzen-text-subtle focus:border-qzen-brand focus:ring-2 focus:ring-qzen-brand/10"
-                  />
-                </div>
-
-                {error && (
-                  <div
-                    role="alert"
-                    className="rounded-qzen-md border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700"
-                  >
-                    {error}
-                  </div>
-                )}
-
-                <button
-                  type="submit"
-                  disabled={loading}
-                  className="flex w-full items-center justify-center gap-2 rounded-qzen-md bg-qzen-brand px-6 py-3.5 text-sm font-semibold text-white shadow-qzen-sm transition hover:bg-qzen-brand-strong focus:outline-none focus-visible:ring-2 focus-visible:ring-qzen-brand focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
-                >
-                  {loading ? "Creating queue..." : "Create queue"}
-
-                  {!loading && (
-                    <span aria-hidden="true">→</span>
-                  )}
-                </button>
-              </form>
-
-              <p className="mt-5 text-center text-xs leading-5 text-qzen-text-subtle">
-                You can create more queues later.
-              </p>
-            </div>
-
-            {/* Progress */}
-            <div className="mx-auto mt-8 flex max-w-xs items-center gap-3">
-              <div className="h-1.5 flex-1 rounded-full bg-qzen-brand" />
-
-              <div className="h-1.5 flex-1 rounded-full bg-qzen-brand" />
-            </div>
-
-            <p className="mt-3 text-center text-xs text-qzen-text-subtle">
-              Queue setup
-            </p>
-          </section>
+          <span className="font-mono font-semibold text-qzen-brand">02</span>
         </div>
+      }
+    >
+      <div className="w-full max-w-md">
+        <motion.section {...fadeUp(0.05)} className={cardClass}>
+          {/* Intro */}
+          <div className="text-center">
+            <div className="mx-auto inline-flex items-center gap-2 rounded-full border border-line-light bg-paper-2 px-3 py-1.5 font-mono text-[11px] font-semibold uppercase tracking-[0.16em] text-qzen-brand">
+              <span className="h-1.5 w-1.5 rounded-full bg-qz-accent" />
+              Step 2 of 2
+            </div>
+
+            <h1 className={`mt-5 ${headingClass}`}>Create your first queue</h1>
+
+            <p className="mt-2.5 text-[15px] leading-6 text-ink-text-2">
+              Give your queue a name so customers and staff know
+              what it is for.
+            </p>
+          </div>
+
+          <form onSubmit={handleSubmit} className="mt-7 space-y-6">
+            <div>
+              <label
+                htmlFor="queueName"
+                className={labelClass}
+              >
+                Queue name
+              </label>
+
+              <p className="mt-1.5 text-[13px] leading-5 text-ink-text-3">
+                This is what customers will see when they join.
+              </p>
+
+              <input
+                id="queueName"
+                type="text"
+                value={queueName}
+                onChange={(event) =>
+                  setQueueName(event.target.value)
+                }
+                required
+                autoComplete="off"
+                placeholder="e.g. General Consultation"
+                className={`mt-3 ${inputClass}`}
+              />
+            </div>
+
+            {error && (
+              <div role="alert" className={errorClass}>
+                {error}
+              </div>
+            )}
+
+            <button
+              type="submit"
+              disabled={loading}
+              className={primaryButtonClass}
+            >
+              {loading ? "Creating queue..." : "Create queue"}
+
+              {!loading && (
+                <span aria-hidden="true">→</span>
+              )}
+            </button>
+          </form>
+
+          <p className="mt-5 text-center text-[12.5px] leading-6 text-ink-text-3">
+            You can create more queues later.
+          </p>
+        </motion.section>
+
+        {/* Progress */}
+        <motion.div {...fadeUp(0.14)}>
+          <div className="mx-auto mt-7 flex max-w-xs items-center gap-3">
+            <div className="h-1.5 flex-1 rounded-full bg-qz-accent" />
+
+            <div className="h-1.5 flex-1 rounded-full bg-qz-accent" />
+          </div>
+
+          <p className="mt-3 text-center text-[12.5px] leading-5 text-ink-text-3">
+            Queue setup
+          </p>
+        </motion.div>
       </div>
-    </main>
+    </CustomerShell>
   );
 }
