@@ -2,6 +2,16 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
+import { motion } from "motion/react";
+import {
+  cardClass,
+  errorClass,
+  fadeUp,
+  headingClass,
+  inputClass,
+  labelClass,
+  primaryButtonClass,
+} from "@/components/customer/styles";
 
 function getQueuePath(value: string) {
   const trimmedValue = value.trim();
@@ -84,7 +94,7 @@ export default function JoinQueueButton({
 
       {open && (
         <div
-          className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 px-5"
+          className="fixed inset-0 z-50 flex items-center justify-center bg-ink-text/45 px-5 backdrop-blur-sm"
           role="dialog"
           aria-modal="true"
           aria-labelledby="join-queue-title"
@@ -94,17 +104,14 @@ export default function JoinQueueButton({
             }
           }}
         >
-          <div className="w-full max-w-md rounded-qzen-xl border border-qzen-border bg-qzen-surface p-6 shadow-qzen-lg">
+          <motion.section {...fadeUp(0)} className={cardClass}>
             <div className="flex items-start justify-between gap-4">
-              <div>
-                <h2
-                  id="join-queue-title"
-                  className="text-xl font-semibold tracking-tight text-qzen-text"
-                >
+              <div className="min-w-0">
+                <h2 id="join-queue-title" className={headingClass}>
                   Join a queue
                 </h2>
 
-                <p className="mt-2 text-sm leading-6 text-qzen-text-secondary">
+                <p className="mt-2.5 text-[15px] leading-6 text-ink-text-2">
                   Already have a Qzen queue link? Paste it below to continue.
                 </p>
               </div>
@@ -113,7 +120,7 @@ export default function JoinQueueButton({
                 type="button"
                 onClick={handleClose}
                 aria-label="Close"
-                className="rounded-full p-1.5 text-qzen-text-subtle transition hover:bg-qzen-surface-muted hover:text-qzen-text"
+                className="shrink-0 rounded-lg p-2 text-ink-text-3 transition hover:bg-paper-2 hover:text-ink-text"
               >
                 <svg
                   width="20"
@@ -131,10 +138,7 @@ export default function JoinQueueButton({
             </div>
 
             <div className="mt-6">
-              <label
-                htmlFor="queue-link"
-                className="text-sm font-medium text-qzen-text"
-              >
+              <label htmlFor="queue-link" className={labelClass}>
                 Queue link
               </label>
 
@@ -152,12 +156,12 @@ export default function JoinQueueButton({
                   }
                 }}
                 placeholder="Paste your Qzen queue link"
-                className="mt-2 h-11 w-full rounded-qzen-md border border-qzen-border-strong bg-white px-3 text-sm text-qzen-text outline-none transition placeholder:text-qzen-text-subtle focus:border-qzen-brand focus:ring-2 focus:ring-qzen-brand/10"
+                className={`mt-2 ${inputClass}`}
                 autoFocus
               />
 
               {error && (
-                <p className="mt-2 text-sm text-red-600" role="alert">
+                <p className={`mt-3 ${errorClass}`} role="alert">
                   {error}
                 </p>
               )}
@@ -166,15 +170,15 @@ export default function JoinQueueButton({
             <button
               type="button"
               onClick={handleContinue}
-              className="mt-5 inline-flex h-11 w-full items-center justify-center rounded-qzen-md bg-qzen-brand px-5 text-sm font-semibold text-white shadow-qzen-md transition hover:bg-qzen-brand-strong"
+              className={`mt-5 ${primaryButtonClass}`}
             >
               Continue
             </button>
 
-            <p className="mt-4 text-center text-xs text-qzen-text-subtle">
+            <p className="mt-4 text-center text-[12.5px] leading-6 text-ink-text-3">
               No app. No account required.
             </p>
-          </div>
+          </motion.section>
         </div>
       )}
     </>

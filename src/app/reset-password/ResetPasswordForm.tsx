@@ -1,9 +1,21 @@
 "use client";
 
-import { FormEvent, useEffect, useRef, useState } from "react";
+import { FormEvent, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
+import { motion } from "motion/react";
 import { authClient } from "@/lib/auth-client";
 import { z } from "zod";
+import CustomerShell from "@/components/customer/CustomerShell";
+import { PasswordField } from "@/components/customer/ui";
+import {
+  cardClass,
+  eyebrowClass,
+  errorClass,
+  fadeUp,
+  headingClass,
+  linkClass,
+  primaryButtonClass,
+} from "@/components/customer/styles";
 
 const resetPasswordSchema = z
   .object({
@@ -29,48 +41,9 @@ export default function ResetPasswordForm() {
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
 
-  const [showPassword, setShowPassword] = useState(false);
-  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
-
-  const passwordTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
-  const confirmPasswordTimeoutRef = useRef<ReturnType<
-    typeof setTimeout
-  > | null>(null);
-
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
   const [success, setSuccess] = useState(false);
-
-  useEffect(() => {
-    const passwordTimeout = passwordTimeoutRef.current;
-    const confirmPasswordTimeout = confirmPasswordTimeoutRef.current;
-
-    return () => {
-      if (passwordTimeout) {
-        clearTimeout(passwordTimeout);
-      }
-
-      if (confirmPasswordTimeout) {
-        clearTimeout(confirmPasswordTimeout);
-      }
-    };
-  }, []);
-
-  function temporarilyShowPassword(
-    setVisible: (visible: boolean) => void,
-    timeoutRef: React.MutableRefObject<ReturnType<typeof setTimeout> | null>,
-  ) {
-    if (timeoutRef.current) {
-      clearTimeout(timeoutRef.current);
-    }
-
-    setVisible(true);
-
-    timeoutRef.current = setTimeout(() => {
-      setVisible(false);
-      timeoutRef.current = null;
-    }, 2000);
-  }
 
   async function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
@@ -113,60 +86,71 @@ export default function ResetPasswordForm() {
 
   if (success) {
     return (
-      <main className="flex min-h-screen items-center justify-center bg-zinc-50 px-6 py-12">
-        <section className="w-full max-w-md">
-          <div className="rounded-3xl border border-zinc-200 bg-white p-8 text-center shadow-sm sm:p-10">
-            <p className="text-sm font-semibold uppercase tracking-[0.2em] text-emerald-700">
-              Qzen
-            </p>
+      <CustomerShell>
+        <motion.section {...fadeUp(0.05)} className={cardClass}>
+          <div className="text-center">
+            <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-full bg-qzen-brand-soft">
+              <svg
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth={1.8}
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                className="h-6 w-6 text-qzen-brand"
+                aria-hidden="true"
+              >
+                <path d="M4 12.5 9 17.5 20 6.5" />
+              </svg>
+            </div>
 
-            <h1 className="mt-4 text-3xl font-bold tracking-tight text-zinc-950">
+            <p className={`mt-6 ${eyebrowClass}`}>Password recovery</p>
+
+            <h1 className={`mt-3 ${headingClass}`}>
               Password reset successful
             </h1>
 
-            <p className="mt-3 text-sm leading-6 text-zinc-600">
+            <p className="mt-3 text-[15px] leading-[1.6] text-ink-text-2">
               Your password has been changed successfully. You can now sign in
               with your new password.
             </p>
-
-            <button
-              type="button"
-              onClick={() => router.push("/login")}
-              className="mt-8 w-full rounded-xl bg-emerald-700 px-5 py-3.5 text-sm font-semibold text-white transition hover:bg-emerald-800 focus:outline-none focus-visible:ring-2 focus-visible:ring-emerald-600 focus-visible:ring-offset-2"
-            >
-              Go to login
-            </button>
           </div>
-        </section>
-      </main>
+
+          <motion.button
+            {...fadeUp(0.2)}
+            type="button"
+            onClick={() => router.push("/login")}
+            className={`${primaryButtonClass} mt-8`}
+          >
+            Go to login
+          </motion.button>
+        </motion.section>
+      </CustomerShell>
     );
   }
 
   return (
-    <main className="flex min-h-screen items-center justify-center bg-zinc-50 px-6 py-12">
-      <section className="w-full max-w-md">
-        <div className="rounded-3xl border border-zinc-200 bg-white p-8 shadow-sm sm:p-10">
-          <div className="text-center">
-            <p className="text-sm font-semibold uppercase tracking-[0.2em] text-emerald-700">
-              Qzen
-            </p>
+    <CustomerShell>
+      <motion.section {...fadeUp(0.05)} className={cardClass}>
+        <motion.div {...fadeUp(0.12)} className="text-center">
+          <p className={eyebrowClass}>Password recovery</p>
 
-            <h1 className="mt-4 text-3xl font-bold tracking-tight text-zinc-950">
-              Create a new password
-            </h1>
+          <h1 className={`mt-3 ${headingClass}`}>
+            {token ? "Create a new password" : "Get a new reset link"}
+          </h1>
 
-            <p className="mt-2 text-sm leading-6 text-zinc-600">
-              Choose a new password for your Qzen account.
-            </p>
-          </div>
+          <p className="mt-2.5 text-[15px] leading-6 text-ink-text-2">
+            {token
+              ? "Choose a new password for your Qzen account."
+              : "This page needs a valid reset link. Request a new one and we'll email it to you."}
+          </p>
+        </motion.div>
 
+        <motion.div {...fadeUp(0.2)} className="mt-7 space-y-4">
           {urlError && (
-            <div
-              role="alert"
-              className="mt-8 rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700"
-            >
-              This password reset link is invalid or has expired. Please request
-              a new one.
+            <div role="alert" className={errorClass}>
+              This password reset link is invalid or has expired. Please
+              request a new one.
             </div>
           )}
 
@@ -174,170 +158,68 @@ export default function ResetPasswordForm() {
             <button
               type="button"
               onClick={() => router.push("/forgot-password")}
-              className="mt-6 w-full rounded-xl bg-emerald-700 px-5 py-3.5 text-sm font-semibold text-white transition hover:bg-emerald-800"
+              className={primaryButtonClass}
             >
               Request a new reset link
             </button>
           ) : (
-            <form onSubmit={handleSubmit} className="mt-8 space-y-5">
-              <div>
-                <label
-                  htmlFor="password"
-                  className="text-sm font-medium text-zinc-700"
-                >
-                  New password
-                </label>
+            <form onSubmit={handleSubmit} className="space-y-5">
+              <PasswordField
+                id="password"
+                label="New password"
+                value={password}
+                onChange={setPassword}
+                required
+                minLength={8}
+                maxLength={128}
+                autoComplete="new-password"
+                placeholder="Create a new password"
+                revealDuration={2000}
+              />
 
-                <div className="relative mt-2">
-                  <input
-                    id="password"
-                    type={showPassword ? "text" : "password"}
-                    value={password}
-                    onChange={(event) => setPassword(event.target.value)}
-                    required
-                    minLength={8}
-                    maxLength={128}
-                    autoComplete="new-password"
-                    placeholder="Create a new password"
-                    className="w-full rounded-xl border border-zinc-300 px-4 py-3 pr-12 outline-none transition focus:border-emerald-700 focus:ring-2 focus:ring-emerald-100"
-                  />
-
-                  <button
-                    type="button"
-                    aria-label="Show password temporarily"
-                    onClick={() =>
-                      temporarilyShowPassword(
-                        setShowPassword,
-                        passwordTimeoutRef,
-                      )
-                    }
-                    className="absolute right-3 top-1/2 -translate-y-1/2 rounded-lg p-2 text-zinc-500 transition hover:bg-zinc-100 hover:text-zinc-700 focus:outline-none focus-visible:ring-2 focus-visible:ring-emerald-600"
-                  >
-                    {showPassword ? (
-                      <svg
-                        aria-hidden="true"
-                        viewBox="0 0 24 24"
-                        fill="none"
-                        stroke="currentColor"
-                        strokeWidth="2"
-                        className="h-5 w-5"
-                      >
-                        <path d="M3 3l18 18" />
-                        <path d="M10.6 10.6a2 2 0 0 0 2.8 2.8" />
-                        <path d="M9.9 4.2A10.8 10.8 0 0 1 12 4c5 0 8.5 4 10 8-0.5 1.3-1.2 2.4-2 3.4" />
-                        <path d="M6.2 6.2C4.6 7.4 3.5 9 2 12c1.5 4 5 8 10 8 1.5 0 2.9-.4 4.1-1" />
-                      </svg>
-                    ) : (
-                      <svg
-                        aria-hidden="true"
-                        viewBox="0 0 24 24"
-                        fill="none"
-                        stroke="currentColor"
-                        strokeWidth="2"
-                        className="h-5 w-5"
-                      >
-                        <path d="M2 12s3.5-6 10-6 10 6 10 6-3.5 6-10 6S2 12 2 12Z" />
-                        <circle cx="12" cy="12" r="2.5" />
-                      </svg>
-                    )}
-                  </button>
-                </div>
-              </div>
-
-              <div>
-                <label
-                  htmlFor="confirmPassword"
-                  className="text-sm font-medium text-zinc-700"
-                >
-                  Confirm password
-                </label>
-
-                <div className="relative mt-2">
-                  <input
-                    id="confirmPassword"
-                    type={showConfirmPassword ? "text" : "password"}
-                    value={confirmPassword}
-                    onChange={(event) => setConfirmPassword(event.target.value)}
-                    required
-                    minLength={8}
-                    maxLength={128}
-                    autoComplete="new-password"
-                    placeholder="Confirm your new password"
-                    className="w-full rounded-xl border border-zinc-300 px-4 py-3 pr-12 outline-none transition focus:border-emerald-700 focus:ring-2 focus:ring-emerald-100"
-                  />
-
-                  <button
-                    type="button"
-                    aria-label="Show password temporarily"
-                    onClick={() =>
-                      temporarilyShowPassword(
-                        setShowConfirmPassword,
-                        confirmPasswordTimeoutRef,
-                      )
-                    }
-                    className="absolute right-3 top-1/2 -translate-y-1/2 rounded-lg p-2 text-zinc-500 transition hover:bg-zinc-100 hover:text-zinc-700 focus:outline-none focus-visible:ring-2 focus:ring-emerald-600"
-                  >
-                    {showConfirmPassword ? (
-                      <svg
-                        aria-hidden="true"
-                        viewBox="0 0 24 24"
-                        fill="none"
-                        stroke="currentColor"
-                        strokeWidth="2"
-                        className="h-5 w-5"
-                      >
-                        <path d="M3 3l18 18" />
-                        <path d="M10.6 10.6a2 2 0 0 0 2.8 2.8" />
-                        <path d="M9.9 4.2A10.8 10.8 0 0 1 12 4c5 0 8.5 4 10 8-0.5 1.3-1.2 2.4-2 3.4" />
-                        <path d="M6.2 6.2C4.6 7.4 3.5 9 2 12c1.5 4 5 8 10 8 1.5 0 2.9-.4 4.1-1" />
-                      </svg>
-                    ) : (
-                      <svg
-                        aria-hidden="true"
-                        viewBox="0 0 24 24"
-                        fill="none"
-                        stroke="currentColor"
-                        strokeWidth="2"
-                        className="h-5 w-5"
-                      >
-                        <path d="M2 12s3.5-6 10-6 10 6 10 6-3.5 6-10 6S2 12 2 12Z" />
-                        <circle cx="12" cy="12" r="2.5" />
-                      </svg>
-                    )}
-                  </button>
-                </div>
-              </div>
+              <PasswordField
+                id="confirmPassword"
+                label="Confirm password"
+                value={confirmPassword}
+                onChange={setConfirmPassword}
+                required
+                minLength={8}
+                maxLength={128}
+                autoComplete="new-password"
+                placeholder="Confirm your new password"
+                revealDuration={2000}
+              />
 
               {error && (
-                <div
-                  role="alert"
-                  className="rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700"
-                >
+                <p role="alert" className={errorClass}>
                   {error}
-                </div>
+                </p>
               )}
 
               <button
                 type="submit"
                 disabled={loading}
-                className="w-full rounded-xl bg-emerald-700 px-5 py-3.5 text-sm font-semibold text-white transition hover:bg-emerald-800 focus:outline-none focus-visible:ring-2 focus-visible:ring-emerald-600 focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+                className={primaryButtonClass}
               >
                 {loading ? "Resetting password..." : "Reset password"}
               </button>
             </form>
           )}
+        </motion.div>
 
-          <div className="mt-8 text-center">
-            <button
-              type="button"
-              onClick={() => router.push("/login")}
-              className="text-sm font-semibold text-emerald-700 transition hover:text-emerald-800"
-            >
-              ← Back to login
-            </button>
-          </div>
-        </div>
-      </section>
-    </main>
+        <motion.div
+          {...fadeUp(0.3)}
+          className="mt-7 border-t border-line-light pt-6 text-center"
+        >
+          <button
+            type="button"
+            onClick={() => router.push("/login")}
+            className={`inline-flex min-h-6 items-center px-2 py-1 text-[14px] ${linkClass}`}
+          >
+            &larr; Back to login
+          </button>
+        </motion.div>
+      </motion.section>
+    </CustomerShell>
   );
 }

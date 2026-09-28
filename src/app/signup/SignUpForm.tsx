@@ -1,9 +1,23 @@
 "use client";
 
-import { FormEvent, useRef, useEffect, useState } from "react";
+import { FormEvent, useState } from "react";
 import { useRouter } from "next/navigation";
+import { motion } from "motion/react";
 import { authClient } from "@/lib/auth-client";
 import { signupSchema } from "@/lib/validations/auth";
+import CustomerShell from "@/components/customer/CustomerShell";
+import { Field, PasswordField } from "@/components/customer/ui";
+import {
+  cardClass,
+  eyebrowClass,
+  errorClass,
+  fadeUp,
+  headingClass,
+  inputClass,
+  linkClass,
+  primaryButtonClass,
+  quietButtonClass,
+} from "@/components/customer/styles";
 
 export default function SignUpPage() {
   const router = useRouter();
@@ -11,8 +25,6 @@ export default function SignUpPage() {
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  const [showPassword, setShowPassword] = useState(false);
-  const passwordTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   const [loading, setLoading] = useState(false);
   const [googleLoading, setGoogleLoading] = useState(false);
@@ -97,45 +109,33 @@ export default function SignUpPage() {
     }
   }
 
-  useEffect(() => {
-    return () => {
-      if (passwordTimeoutRef.current) {
-        clearTimeout(passwordTimeoutRef.current);
-      }
-    };
-  }, []);
-
   const isLoading = loading || googleLoading;
 
   return (
-    <main className="flex min-h-screen items-center justify-center bg-zinc-50 px-6 py-12">
-      <section className="w-full max-w-md">
-        <div className="rounded-3xl border border-zinc-200 bg-white p-8 shadow-sm sm:p-10">
-          <div className="text-center">
-            <p className="text-sm font-semibold uppercase tracking-[0.2em] text-emerald-700">
-              Qzen
-            </p>
+    <CustomerShell>
+      <motion.section {...fadeUp(0.05)} className={cardClass}>
+        <motion.div {...fadeUp(0.12)} className="text-center">
+          <p className={eyebrowClass}>Business account</p>
 
-            <h1 className="mt-4 text-3xl font-bold tracking-tight text-zinc-950">
-              Create your account
-            </h1>
+          <h1 className={`mt-3 ${headingClass}`}>Create your account</h1>
 
-            <p className="mt-2 text-sm leading-6 text-zinc-600">
-              Start managing your queue with Qzen.
-            </p>
-          </div>
+          <p className="mt-2.5 text-[15px] leading-6 text-ink-text-2">
+            Start managing your queue with Qzen.
+          </p>
+        </motion.div>
 
+        <motion.div {...fadeUp(0.2)}>
           <button
             type="button"
             onClick={handleGoogleSignUp}
             disabled={isLoading}
-            className="mt-8 flex w-full items-center justify-center gap-3 rounded-xl border border-zinc-300 bg-white px-5 py-3.5 text-sm font-semibold text-zinc-800 transition hover:border-zinc-400 hover:bg-zinc-50 focus:outline-none focus-visible:ring-2 focus-visible:ring-emerald-600 focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+            className={`${quietButtonClass} mt-8 h-12`}
           >
             {googleLoading ? (
               "Connecting to Google..."
             ) : (
               <>
-                <svg aria-hidden="true" viewBox="0 0 24 24" className="h-5 w-5">
+                <svg aria-hidden="true" viewBox="0 0 24 24" className="h-[18px] w-[18px]">
                   <path
                     fill="#4285F4"
                     d="M21.35 12.27c0-.72-.06-1.42-.18-2.09H12v3.95h5.24a4.48 4.48 0 0 1-1.94 2.94v2.45h3.14c1.84-1.69 2.91-4.18 2.91-7.25Z"
@@ -159,154 +159,83 @@ export default function SignUpPage() {
           </button>
 
           <div className="my-7 flex items-center gap-4">
-            <div className="h-px flex-1 bg-zinc-200" />
+            <div className="h-px flex-1 bg-line-light" />
 
-            <span className="text-xs font-medium uppercase tracking-wider text-zinc-400">
+            <span className="font-mono text-[10px] uppercase tracking-[0.2em] text-ink-text-3">
               or
             </span>
 
-            <div className="h-px flex-1 bg-zinc-200" />
+            <div className="h-px flex-1 bg-line-light" />
           </div>
+        </motion.div>
 
-          <form onSubmit={handleSubmit} className="space-y-5">
-            <div>
-              <label
-                htmlFor="name"
-                className="text-sm font-medium text-zinc-700"
-              >
-                Your name
-              </label>
+        <motion.form
+          {...fadeUp(0.28)}
+          onSubmit={handleSubmit}
+          className="space-y-5"
+        >
+          <Field id="name" label="Your name">
+            <input
+              id="name"
+              type="text"
+              value={name}
+              onChange={(event) => setName(event.target.value)}
+              required
+              autoComplete="name"
+              placeholder="Enter your full name"
+              className={inputClass}
+            />
+          </Field>
 
-              <input
-                id="name"
-                type="text"
-                value={name}
-                onChange={(event) => setName(event.target.value)}
-                required
-                autoComplete="name"
-                placeholder="Enter your full name"
-                className="mt-2 w-full rounded-xl border border-zinc-300 px-4 py-3 outline-none transition focus:border-emerald-700 focus:ring-2 focus:ring-emerald-100"
-              />
-            </div>
+          <Field id="email" label="Email">
+            <input
+              id="email"
+              type="email"
+              value={email}
+              onChange={(event) => setEmail(event.target.value)}
+              required
+              autoComplete="email"
+              placeholder="you@company.com"
+              className={inputClass}
+            />
+          </Field>
 
-            <div>
-              <label
-                htmlFor="email"
-                className="text-sm font-medium text-zinc-700"
-              >
-                Email
-              </label>
+          <PasswordField
+            id="password"
+            label="Password"
+            value={password}
+            onChange={setPassword}
+            required
+            minLength={8}
+            autoComplete="new-password"
+            placeholder="Create a password"
+          />
 
-              <input
-                id="email"
-                type="email"
-                value={email}
-                onChange={(event) => setEmail(event.target.value)}
-                required
-                autoComplete="email"
-                placeholder="you@company.com"
-                className="mt-2 w-full rounded-xl border border-zinc-300 px-4 py-3 outline-none transition focus:border-emerald-700 focus:ring-2 focus:ring-emerald-100"
-              />
-            </div>
+          {error && (
+            <p role="alert" className={errorClass}>
+              {error}
+            </p>
+          )}
 
-            <div>
-              <label
-                htmlFor="password"
-                className="text-sm font-medium text-zinc-700"
-              >
-                Password
-              </label>
+          <button
+            type="submit"
+            disabled={isLoading}
+            className={primaryButtonClass}
+          >
+            {loading ? "Creating account..." : "Create account"}
+          </button>
+        </motion.form>
 
-              <div className="relative mt-2">
-                <input
-                  id="password"
-                  type={showPassword ? "text" : "password"}
-                  value={password}
-                  onChange={(event) => setPassword(event.target.value)}
-                  required
-                  minLength={8}
-                  autoComplete="new-password"
-                  placeholder="Create a password"
-                  className="w-full rounded-xl border border-zinc-300 px-4 py-3 pr-12 outline-none transition focus:border-emerald-700 focus:ring-2 focus:ring-emerald-100"
-                />
-
-                <button
-                  type="button"
-                  aria-label="Show password temporarily"
-                  onClick={() => {
-                    if (passwordTimeoutRef.current) {
-                      clearTimeout(passwordTimeoutRef.current);
-                    }
-
-                    setShowPassword(true);
-
-                    passwordTimeoutRef.current = setTimeout(() => {
-                      setShowPassword(false);
-                      passwordTimeoutRef.current = null;
-                    }, 1000);
-                  }}
-                  className="absolute right-3 top-1/2 -translate-y-1/2 rounded-lg p-2 text-zinc-500 transition hover:bg-zinc-100 hover:text-zinc-700 focus:outline-none focus-visible:ring-2 focus-visible:ring-emerald-600"
-                >
-                  {showPassword ? (
-                    <svg
-                      aria-hidden="true"
-                      viewBox="0 0 24 24"
-                      fill="none"
-                      stroke="currentColor"
-                      strokeWidth="2"
-                      className="h-5 w-5"
-                    >
-                      <path d="M3 3l18 18" />
-                      <path d="M10.6 10.6a2 2 0 0 0 2.8 2.8" />
-                      <path d="M9.9 4.2A10.8 10.8 0 0 1 12 4c5 0 8.5 4 10 8-0.5 1.3-1.2 2.4-2 3.4" />
-                      <path d="M6.2 6.2C4.6 7.4 3.5 9 2 12c1.5 4 5 8 10 8 1.5 0 2.9-.4 4.1-1" />
-                    </svg>
-                  ) : (
-                    <svg
-                      aria-hidden="true"
-                      viewBox="0 0 24 24"
-                      fill="none"
-                      stroke="currentColor"
-                      strokeWidth="2"
-                      className="h-5 w-5"
-                    >
-                      <path d="M2 12s3.5-6 10-6 10 6 10 6-3.5 6-10 6S2 12 2 12Z" />
-                      <circle cx="12" cy="12" r="2.5" />
-                    </svg>
-                  )}
-                </button>
-              </div>
-            </div>
-
-            {error && (
-              <p
-                role="alert"
-                className="rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700"
-              >
-                {error}
-              </p>
-            )}
-
-            <button
-              type="submit"
-              disabled={isLoading}
-              className="w-full rounded-full bg-emerald-800 px-6 py-3.5 font-semibold text-white transition hover:bg-emerald-900 focus:outline-none focus-visible:ring-2 focus-visible:ring-emerald-600 focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
-            >
-              {loading ? "Creating account..." : "Create account"}
-            </button>
-          </form>
-
-          <p className="mt-8 text-center text-sm text-zinc-600">
-            Already have an account?{" "}
-            <a
-              href="/login"
-              className="font-semibold text-emerald-800 hover:text-emerald-900"
-            >
-              Sign in
-            </a>
-          </p>
-        </div>
-      </section>
-    </main>
+        <motion.p
+          {...fadeUp(0.36)}
+          className="mt-7 border-t border-line-light pt-6 text-center text-[14px] text-ink-text-2"
+        >
+          Already have an account?{" "}
+          <a href="/login" className={linkClass}>
+            Sign in
+          </a>
+        </motion.p>
+      </motion.section>
+    </CustomerShell>
   );
 }

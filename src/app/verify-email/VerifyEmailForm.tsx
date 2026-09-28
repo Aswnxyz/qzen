@@ -2,7 +2,19 @@
 
 import { FormEvent, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
+import { motion } from "motion/react";
 import { authClient } from "@/lib/auth-client";
+import CustomerShell from "@/components/customer/CustomerShell";
+import { Field } from "@/components/customer/ui";
+import {
+  cardClass,
+  eyebrowClass,
+  errorClass,
+  fadeUp,
+  headingClass,
+  inputClass,
+  primaryButtonClass,
+} from "@/components/customer/styles";
 
 export default function VerifyEmailPage() {
   const router = useRouter();
@@ -47,129 +59,115 @@ export default function VerifyEmailPage() {
 
   if (verified) {
     return (
-      <main className="flex min-h-screen items-center justify-center bg-zinc-50 px-6 py-12">
-        <section className="w-full max-w-md">
-          <div className="rounded-3xl border border-zinc-200 bg-white p-8 text-center shadow-sm sm:p-10">
-            <p className="text-sm font-semibold uppercase tracking-[0.2em] text-emerald-700">
-              Qzen
-            </p>
-
-            <div className="mx-auto mt-8 flex h-16 w-16 items-center justify-center rounded-full bg-emerald-100">
+      <CustomerShell>
+        <motion.section {...fadeUp(0.05)} className={cardClass}>
+          <div className="text-center">
+            <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-full bg-qzen-brand-soft">
               <svg
                 aria-hidden="true"
                 viewBox="0 0 24 24"
                 fill="none"
                 stroke="currentColor"
-                strokeWidth="2.5"
-                className="h-8 w-8 text-emerald-700"
+                strokeWidth={2.2}
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                className="h-7 w-7 text-qzen-brand"
               >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  d="m5 12 4 4L19 6"
-                />
+                <path d="m5 12 4 4L19 6" />
               </svg>
             </div>
 
-            <h1 className="mt-6 text-3xl font-bold tracking-tight text-zinc-950">
-              Email verified!
-            </h1>
+            <p className={`mt-6 ${eyebrowClass}`}>Email verification</p>
 
-            <p className="mt-3 text-sm leading-6 text-zinc-600">
+            <h1 className={`mt-3 ${headingClass}`}>Email verified!</h1>
+
+            <p className="mt-3 text-[15px] leading-[1.6] text-ink-text-2">
               Your email address has been successfully verified.
             </p>
 
-            <p className="mt-1 text-sm leading-6 text-zinc-600">
+            <p className="mt-1 text-[15px] leading-[1.6] text-ink-text-2">
               You can now sign in to your Qzen account.
             </p>
-
-            <button
-              type="button"
-              onClick={() => router.push("/login")}
-              className="mt-8 w-full rounded-full bg-emerald-800 px-6 py-3.5 font-semibold text-white transition hover:bg-emerald-900 focus:outline-none focus-visible:ring-2 focus-visible:ring-emerald-600 focus-visible:ring-offset-2"
-            >
-              Continue to sign in
-            </button>
           </div>
-        </section>
-      </main>
+
+          <motion.button
+            {...fadeUp(0.2)}
+            type="button"
+            onClick={() => router.push("/login")}
+            className={`${primaryButtonClass} mt-8`}
+          >
+            Continue to sign in
+          </motion.button>
+        </motion.section>
+      </CustomerShell>
     );
   }
 
   return (
-    <main className="flex min-h-screen items-center justify-center bg-zinc-50 px-6 py-12">
-      <section className="w-full max-w-md">
-        <div className="rounded-3xl border border-zinc-200 bg-white p-8 shadow-sm sm:p-10">
-          <div className="text-center">
-            <p className="text-sm font-semibold uppercase tracking-[0.2em] text-emerald-700">
-              Qzen
-            </p>
+    <CustomerShell>
+      <motion.section {...fadeUp(0.05)} className={cardClass}>
+        <motion.div {...fadeUp(0.12)} className="text-center">
+          <p className={eyebrowClass}>Email verification</p>
 
-            <h1 className="mt-4 text-3xl font-bold tracking-tight text-zinc-950">
-              Verify your email
-            </h1>
+          <h1 className={`mt-3 ${headingClass}`}>Verify your email</h1>
 
-            <p className="mt-3 text-sm leading-6 text-zinc-600">
-              We sent a 6-digit verification code to
-            </p>
-
-            <p className="mt-1 break-all text-sm font-semibold text-zinc-900">
-              {email || "your email address"}
-            </p>
-          </div>
-
-          <form onSubmit={handleSubmit} className="mt-8 space-y-5">
-            <div>
-              <label
-                htmlFor="otp"
-                className="text-sm font-medium text-zinc-700"
-              >
-                Verification code
-              </label>
-
-              <input
-                id="otp"
-                type="text"
-                inputMode="numeric"
-                autoComplete="one-time-code"
-                value={otp}
-                onChange={(event) =>
-                  setOtp(
-                    event.target.value
-                      .replace(/\D/g, "")
-                      .slice(0, 6)
-                  )
-                }
-                required
-                maxLength={6}
-                placeholder="Enter 6-digit code"
-                className="mt-2 w-full rounded-xl border border-zinc-300 px-4 py-3 text-center text-xl font-semibold tracking-[0.35em] outline-none transition focus:border-emerald-700 focus:ring-2 focus:ring-emerald-100"
-              />
-            </div>
-
-            {error && (
-              <p
-                role="alert"
-                className="rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700"
-              >
-                {error}
-              </p>
-            )}
-
-            <button
-              type="submit"
-              disabled={loading || otp.length !== 6 || !email}
-              className="w-full rounded-full bg-emerald-800 px-6 py-3.5 font-semibold text-white transition hover:bg-emerald-900 focus:outline-none focus-visible:ring-2 focus-visible:ring-emerald-600 focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
-            >
-              {loading ? "Verifying..." : "Verify email"}
-            </button>
-          </form>
-
-          <p className="mt-6 text-center text-xs leading-5 text-zinc-500">
-            Your verification code expires in 10 minutes.
+          <p className="mt-3 text-[15px] leading-6 text-ink-text-2">
+            We sent a 6-digit verification code to
           </p>
-        </div>
-      </section>
-    </main>
+
+          <p className="mt-1 break-all text-[15px] font-semibold text-ink-text">
+            {email || "your email address"}
+          </p>
+        </motion.div>
+
+        <motion.form
+          {...fadeUp(0.2)}
+          onSubmit={handleSubmit}
+          className="mt-7 space-y-5"
+        >
+          <Field id="otp" label="Verification code">
+            <input
+              id="otp"
+              type="text"
+              inputMode="numeric"
+              autoComplete="one-time-code"
+              value={otp}
+              onChange={(event) =>
+                setOtp(
+                  event.target.value
+                    .replace(/\D/g, "")
+                    .slice(0, 6)
+                )
+              }
+              required
+              maxLength={6}
+              placeholder="000000"
+              className={`${inputClass} text-center font-mono text-[24px] font-semibold tracking-[0.42em] [text-indent:0.42em] tabular-nums`}
+            />
+          </Field>
+
+          {error && (
+            <p role="alert" className={errorClass}>
+              {error}
+            </p>
+          )}
+
+          <button
+            type="submit"
+            disabled={loading || otp.length !== 6 || !email}
+            className={primaryButtonClass}
+          >
+            {loading ? "Verifying..." : "Verify email"}
+          </button>
+        </motion.form>
+
+        <motion.p
+          {...fadeUp(0.3)}
+          className="mt-6 border-t border-line-light pt-5 text-center font-mono text-[11px] uppercase tracking-[0.16em] text-ink-text-3"
+        >
+          Code expires in 10 minutes
+        </motion.p>
+      </motion.section>
+    </CustomerShell>
   );
 }
