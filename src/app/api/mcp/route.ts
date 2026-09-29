@@ -1,6 +1,7 @@
 import { auth } from "@/lib/auth";
 import { requireMcpAuth } from "@better-auth/mcp";
 import { McpServer, createMcpHandler } from "@modelcontextprotocol/server";
+import * as z from "zod/v4";
 
 const mcpHandler = createMcpHandler(async ({ authInfo }) => {
   const server = new McpServer({
@@ -14,9 +15,9 @@ const mcpHandler = createMcpHandler(async ({ authInfo }) => {
       title: "Ping Qzen",
       description:
         "Checks whether the authenticated Qzen MCP connection is working.",
-      inputSchema: {},
+      inputSchema: z.object({}),
     },
-    async () => {
+    async (_args, _ctx) => {
       return {
         content: [
           {
