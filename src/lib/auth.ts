@@ -83,6 +83,12 @@ export const auth = betterAuth({
       consentPage: "/consent",
       resource: process.env.MCP_RESOURCE_URL!,
       scopes: ["mcp:read", "mcp:write"],
+      // RFC 7591 dynamic client registration so zero-config MCP clients
+      // (e.g. MCP Inspector) can register before any user session exists.
+      // `skip_consent` cannot be set through dynamic registration, so every
+      // registered client still goes through login + consent + PKCE.
+      allowDynamicClientRegistration: true,
+      allowUnauthenticatedClientRegistration: true,
     }),
     cimd({
       fetchClientMetadataResource,

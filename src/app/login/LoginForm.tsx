@@ -49,7 +49,7 @@ export default function LoginPage() {
       return;
     }
 
-    const { error } = await authClient.signIn.email({
+    const { data, error } = await authClient.signIn.email({
       email,
       password,
     });
@@ -63,6 +63,18 @@ export default function LoginPage() {
       }
 
       setLoading(false);
+      return;
+    }
+
+    // During an MCP OAuth flow the server continues the authorization after
+    // sign-in and responds with `{ redirect: true, url }`; the auth client's
+    // redirect plugin already navigates there. Otherwise resume the normal
+    // app flow.
+    const signInResponse = data as unknown as
+      | { redirect?: boolean; url?: string }
+      | null
+      | undefined;
+    if (signInResponse?.redirect) {
       return;
     }
 
@@ -188,7 +200,19 @@ export default function LoginPage() {
             autoComplete="new-password"
             placeholder="Enter your password"
             hint={
-              <a href="/forgot-password" className={linkClass}>
+              <a
+                href="/forgot-password"
+                className={linkClass}
+                onClick={(event) => {
+                  // Keep an in-progress MCP OAuth query (signed `sig` param)
+                  // so the flow can be resumed after this detour.
+                  const query = window.location.search;
+                  if (query) {
+                    event.preventDefault();
+                    router.push(`/forgot-password${query}`);
+                  }
+                }}
+              >
                 Forgot password?
               </a>
             }
@@ -227,7 +251,19 @@ export default function LoginPage() {
           className="mt-7 border-t border-line-light pt-6 text-center text-[14px] text-ink-text-2"
         >
           Don&apos;t have an account?{" "}
-          <a href="/signup" className={linkClass}>
+          <a
+            href="/signup"
+            className={linkClass}
+            onClick={(event) => {
+              // Keep an in-progress MCP OAuth query (signed `sig` param) so
+              // signing up can continue the flow.
+              const query = window.location.search;
+              if (query) {
+                event.preventDefault();
+                router.push(`/signup${query}`);
+              }
+            }}
+          >
             Create one
           </a>
         </motion.p>

@@ -74,7 +74,7 @@ export default function SignUpPage() {
         return;
       }
 
-      const { error } = await authClient.signUp.email({
+      const { data: signUpData, error } = await authClient.signUp.email({
         name,
         email,
         password,
@@ -83,6 +83,17 @@ export default function SignUpPage() {
       if (error) {
         setError(error.message || "Failed to create account.");
         setLoading(false);
+        return;
+      }
+
+      // During an MCP OAuth flow the server continues the authorization
+      // after sign-up and the auth client's redirect plugin navigates to
+      // the returned URL; only resume the normal flow otherwise.
+      const signUpResponse = signUpData as unknown as
+        | { redirect?: boolean; url?: string }
+        | null
+        | undefined;
+      if (signUpResponse?.redirect) {
         return;
       }
 
@@ -231,7 +242,19 @@ export default function SignUpPage() {
           className="mt-7 border-t border-line-light pt-6 text-center text-[14px] text-ink-text-2"
         >
           Already have an account?{" "}
-          <a href="/login" className={linkClass}>
+          <a
+            href="/login"
+            className={linkClass}
+            onClick={(event) => {
+              // Keep an in-progress MCP OAuth query (signed `sig` param) so
+              // signing in can continue the flow.
+              const query = window.location.search;
+              if (query) {
+                event.preventDefault();
+                router.push(`/login${query}`);
+              }
+            }}
+          >
             Sign in
           </a>
         </motion.p>
