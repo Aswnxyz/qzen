@@ -1,7 +1,10 @@
 import { betterAuth } from "better-auth";
 import { mongodbAdapter } from "better-auth/adapters/mongodb";
 import { MongoClient } from "mongodb";
-import { emailOTP } from "better-auth/plugins";
+import { emailOTP, jwt } from "better-auth/plugins";
+import { mcp } from "@better-auth/mcp";
+import { cimd } from "@better-auth/cimd";
+import { fetchClientMetadataResource } from "@better-auth/cimd/node";
 import { Resend } from "resend";
 
 const client = new MongoClient(process.env.MONGODB_URI!);
@@ -74,6 +77,17 @@ export const auth = betterAuth({
     },
   },
   plugins: [
+    jwt(),
+    mcp({
+      loginPage: "/login",
+      consentPage: "/consent",
+      resource: process.env.MCP_RESOURCE_URL!,
+      scopes: ["mcp:read", "mcp:write"],
+    }),
+    cimd({
+      fetchClientMetadataResource,
+      metadataProfile: "mcp-2026-07-28",
+    }),
     emailOTP({
       sendVerificationOnSignUp: true,
       overrideDefaultEmailVerification: true,
