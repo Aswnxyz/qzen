@@ -2,9 +2,10 @@ import { auth } from "@/lib/auth";
 import { requireMcpAuth } from "@better-auth/mcp";
 import { McpServer, createMcpHandler } from "@modelcontextprotocol/server";
 import { corsPreflight, withCors } from "@/lib/cors";
+import { registerQueueTools } from "@/lib/mcpTools";
 import * as z from "zod/v4";
 
-const mcpHandler = createMcpHandler(async () => {
+const mcpHandler = createMcpHandler(async ({ authInfo }) => {
   const server = new McpServer({
     name: "Qzen",
     version: "0.1.0",
@@ -29,6 +30,8 @@ const mcpHandler = createMcpHandler(async () => {
       };
     }
   );
+
+  registerQueueTools(server, authInfo);
 
   return server;
 });
