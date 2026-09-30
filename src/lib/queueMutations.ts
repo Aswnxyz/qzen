@@ -42,11 +42,12 @@ export function getQueueStatuses(): string[] {
 /**
  * Resolves `queueId` only when it belongs to the business owned by `ownerId`.
  *
- * Every mutation in this module starts here, so a queue id on its own is never
- * enough to touch a queue. The errors mirror the read tools exactly: a queue
- * owned by another business reports the same thing as one that does not exist.
+ * Every mutation in this module starts here, as does every analytics query in
+ * `queueAnalytics.ts`, so a queue id on its own is never enough to read or
+ * touch a queue. The errors mirror the read tools exactly: a queue owned by
+ * another business reports the same thing as one that does not exist.
  */
-async function requireOwnedQueue(ownerId: string, queueId: string) {
+export async function requireOwnedQueue(ownerId: string, queueId: string) {
   if (!mongoose.Types.ObjectId.isValid(queueId)) {
     throw new QueueOperationError("Invalid queueId.");
   }

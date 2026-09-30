@@ -9,7 +9,8 @@
     "start": "cross-env NODE_ENV=production node server.ts",
     "lint": "eslint",
     "test:oauth": "node --env-file=.env.local e2e-mcp-oauth.mjs",
-    "test:mcp": "node --env-file=.env.local e2e-mcp-tools.mjs"
+    "test:mcp": "node --env-file=.env.local e2e-mcp-tools.mjs",
+    "test:analytics": "node --env-file=.env.local e2e-mcp-analytics.mjs"
   },
   "dependencies": {
     "@better-auth/cimd": "^1.7.6",

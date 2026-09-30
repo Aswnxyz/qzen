@@ -15,7 +15,24 @@ function getDateKey(timezone: string) {
   return formatter.format(new Date());
 }
 
-export async function getQueueHistory(queueId: string) {
+/**
+ * Per-day summaries for every past session of a queue, newest first.
+ *
+ * `options.limit` caps how many past days are returned (used by the MCP
+ * `get_queue_history` tool). Omitting it preserves the unbounded behaviour the
+ * dashboard has always had.
+ *
+ * `averageServiceTimeMs` is `completedAt - calledAt` and
+ * `averageWaitTimeMs` is `calledAt - joinedAt`, both averaged only over the
+ * entries that carry both timestamps and whose timestamps run forwards, so
+ * dirty data can never pull an average below zero. This is the same rule the
+ * analytics dashboard applies inline. The queue detail page only renders the
+ * counts from this function, never these averages.
+ */
+export async function getQueueHistory(
+  queueId: string,
+  options: { limit?: number } = {},
+) {
   await connectDB();
 
   const queue = await Queue.findById(queueId).lean();
@@ -33,12 +50,16 @@ export async function getQueueHistory(queueId: string) {
   const timezone = business.timezone || "Asia/Kolkata";
   const todayDateKey = getDateKey(timezone);
 
-  const sessions = await QueueSession.find({
+  const sessionsQuery = QueueSession.find({
     queueId,
     dateKey: { $lt: todayDateKey },
-  })
-    .sort({ dateKey: -1 })
-    .lean();
+  }).sort({ dateKey: -1 });
+
+  if (options.limit !== undefined) {
+    sessionsQuery.limit(options.limit);
+  }
+
+  const sessions = await sessionsQuery.lean();
 
   const sessionIds = sessions.map((session) => session._id);
 
@@ -88,10 +109,29 @@ export async function getQueueHistory(queueId: string) {
                 $and: [
                   { $ne: ["$calledAt", null] },
                   { $ne: ["$completedAt", null] },
+                  { $gte: ["$completedAt", "$calledAt"] },
                 ],
               },
               {
                 $subtract: ["$completedAt", "$calledAt"],
+              },
+              null,
+            ],
+          },
+        },
+
+        averageWaitTimeMs: {
+          $avg: {
+            $cond: [
+              {
+                $and: [
+                  { $ne: ["$calledAt", null] },
+                  { $ne: ["$joinedAt", null] },
+                  { $gte: ["$calledAt", "$joinedAt"] },
+                ],
+              },
+              {
+                $subtract: ["$calledAt", "$joinedAt"],
               },
               null,
             ],
@@ -117,6 +157,7 @@ export async function getQueueHistory(queueId: string) {
         waiting: summary?.waiting ?? 0,
         serving: summary?.serving ?? 0,
         averageServiceTimeMs: summary?.averageServiceTimeMs ?? null,
+        averageWaitTimeMs: summary?.averageWaitTimeMs ?? null,
       },
     };
   });
