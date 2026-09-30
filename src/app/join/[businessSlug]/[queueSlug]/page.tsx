@@ -36,6 +36,7 @@ export default async function JoinPage({ params }: JoinPageProps) {
   const queue = await Queue.findOne({
     businessId: business._id,
     slug: queueSlug,
+    deletedAt: null,
   }).lean();
 
   if (!queue) {

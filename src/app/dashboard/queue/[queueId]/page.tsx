@@ -64,6 +64,7 @@ export default async function QueueDashboardPage({
   const queue = await Queue.findOne({
     _id: queueId,
     businessId: business._id,
+    deletedAt: null,
   }).lean();
 
   if (!queue) {

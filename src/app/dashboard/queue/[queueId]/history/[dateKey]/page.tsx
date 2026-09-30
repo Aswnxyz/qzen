@@ -72,6 +72,7 @@ export default async function QueueHistoryPage({
   const queue = await Queue.findOne({
     _id: queueId,
     businessId: business._id,
+    deletedAt: null,
   }).lean();
 
   if (!queue) {

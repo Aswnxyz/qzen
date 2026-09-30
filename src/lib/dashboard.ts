@@ -36,6 +36,7 @@ export async function getBusinessDashboard(ownerId: string) {
 
   const queues = await Queue.find({
     businessId: business._id,
+    deletedAt: null,
   })
     .sort({ createdAt: 1 })
     .lean();

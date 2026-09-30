@@ -26,7 +26,10 @@ export async function POST(
       );
     }
 
-    const queue = await Queue.findById(queueId);
+    const queue = await Queue.findOne({
+      _id: queueId,
+      deletedAt: null,
+    });
 
     if (!queue) {
       return NextResponse.json(

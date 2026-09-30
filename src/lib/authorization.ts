@@ -22,6 +22,9 @@ export async function getBusinessByOwner(ownerId: string) {
  *
  * Callers must never query a queue by id alone — ownership is always verified
  * here so a leaked or guessed queue id cannot cross business boundaries.
+ * Soft-deleted queues (`deletedAt` set) are treated exactly like queues that
+ * do not exist, so a deleted queue can no longer be read, managed, or mutated
+ * by anyone, including MCP callers.
  */
 export async function getQueueForOwner(ownerId: string, queueId: string) {
   await connectDB();
@@ -40,6 +43,7 @@ export async function getQueueForOwner(ownerId: string, queueId: string) {
   const queue = await Queue.findOne({
     _id: queueId,
     businessId: business._id,
+    deletedAt: null,
   });
 
   return {

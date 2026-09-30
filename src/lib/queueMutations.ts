@@ -4,6 +4,7 @@ import { getOrCreateQueueSession } from "@/lib/queueSession";
 import mongoose from "mongoose";
 import Queue from "@/models/Queue";
 import QueueEntry from "@/models/QueueEntry";
+import QueueSession from "@/models/QueueSession";
 
 /**
  * An expected Qzen business-rule failure.
@@ -101,6 +102,75 @@ export async function createQueueForOwner(
   });
 
   return { business, queue };
+}
+
+/**
+ * Renames a queue for the owner.
+ *
+ * The queue is resolved through `requireOwnedQueue`, so the caller can only
+ * rename a queue that already belongs to their business. `name` is the only
+ * accepted field: the slug is the public join URL (`/join/{businessSlug}/
+ * {queueSlug}`) and the target of the QR code, so it is never changed by this
+ * operation — a `slug` sent in the request body is deliberately not read.
+ */
+export async function updateQueueForOwner(
+  ownerId: string,
+  queueId: string,
+  input: { name?: unknown },
+) {
+  const { queue } = await requireOwnedQueue(ownerId, queueId);
+
+  const name = typeof input.name === "string" ? input.name.trim() : "";
+
+  if (!name) {
+    throw new QueueOperationError("Queue name is required");
+  }
+
+  queue.name = name;
+  await queue.save();
+
+  emitQueueUpdated(queueId, { name: queue.name, slug: queue.slug });
+
+  return { queue };
+}
+
+/**
+ * Soft-deletes a queue for the owner: it stops being a live queue, but nothing
+ * is removed from the database.
+ *
+ * `deletedAt` marks the queue as deleted and `status` moves to `closed` using
+ * the existing status architecture, which is what drops the queue out of the
+ * live queue lists and stops it being joinable. Any session that is still
+ * active or paused is closed the same way `setQueueStatus` closes one;
+ * sessions that have already ended, every customer entry, and all history and
+ * analytics data are left untouched.
+ *
+ * Ownership is proven by `requireOwnedQueue` before anything is written, so a
+ * queue id from another business behaves exactly like one that does not exist.
+ */
+export async function deleteQueueForOwner(ownerId: string, queueId: string) {
+  const { queue } = await requireOwnedQueue(ownerId, queueId);
+
+  queue.status = "closed";
+  queue.deletedAt = new Date();
+  await queue.save();
+
+  await QueueSession.updateMany(
+    {
+      queueId,
+      status: { $in: ["active", "paused"] },
+    },
+    {
+      $set: {
+        status: "closed",
+        closedAt: new Date(),
+      },
+    },
+  );
+
+  emitQueueUpdated(queueId, { status: "closed" });
+
+  return { queue };
 }
 
 /**
