@@ -1,7 +1,6 @@
 import { getAuthorizedQueue } from "@/lib/authorization";
-import { getIO } from "@/lib/socket";
-import { getOrCreateQueueSession } from "@/lib/queueSession";
 import { NextResponse } from "next/server";
+import { QueueOperationError, setQueueStatus } from "@/lib/queueMutations";
 
 export async function PATCH(
   request: Request,
@@ -32,54 +31,29 @@ export async function PATCH(
       );
     }
 
-    const queueSession = await getOrCreateQueueSession(queueId);
-
-    if (!queueSession) {
-      return NextResponse.json(
-        {
-          success: false,
-          message: "Failed to get today's queue session",
-        },
-        { status: 500 },
-      );
-    }
-
     const body = await request.json();
 
-    const allowedStatuses = ["active", "paused", "closed"];
-
-    if (!allowedStatuses.includes(body.status)) {
-      return NextResponse.json(
-        {
-          success: false,
-          message: "Invalid queue status",
-        },
-        { status: 400 },
-      );
-    }
-
-    queueSession.status = body.status;
-
-    if (body.status === "closed") {
-      queueSession.closedAt = new Date();
-    } else {
-      queueSession.closedAt = undefined;
-    }
-
-    await queueSession.save();
-
-    const io = getIO();
-
-    io?.to(`queue:${queueId}`).emit("queueUpdated", {
-      status: queueSession.status,
-      currentToken: queueSession.currentToken,
-    });
+    const { queueSession } = await setQueueStatus(
+      session.user.id,
+      queueId,
+      body.status,
+    );
 
     return NextResponse.json({
       success: true,
       session: queueSession,
     });
   } catch (error) {
+    if (error instanceof QueueOperationError) {
+      return NextResponse.json(
+        {
+          success: false,
+          message: error.message,
+        },
+        { status: error.statusCode },
+      );
+    }
+
     console.error("Update queue status error:", error);
 
     return NextResponse.json(

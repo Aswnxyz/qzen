@@ -1,8 +1,9 @@
-import QueueEntry from "@/models/QueueEntry";
 import { NextResponse } from "next/server";
-import { getIO } from "@/lib/socket";
 import { getAuthorizedQueue } from "@/lib/authorization";
-import { getOrCreateQueueSession } from "@/lib/queueSession";
+import {
+  QueueOperationError,
+  completeCurrentCustomer,
+} from "@/lib/queueMutations";
 
 export async function POST(
   request: Request,
@@ -16,6 +17,7 @@ export async function POST(
 ) {
   try {
     const { queueId } = await params;
+
     const { session, queue } = await getAuthorizedQueue(queueId);
 
     if (!session) {
@@ -38,54 +40,27 @@ export async function POST(
       );
     }
 
-    const queueSession = await getOrCreateQueueSession(queueId);
-
-    if (!queueSession) {
-      return NextResponse.json(
-        {
-          success: false,
-          message: "Failed to get today's queue session",
-        },
-        { status: 500 },
-      );
-    }
-
-    const currentEntry = await QueueEntry.findOneAndUpdate(
-      {
-        queueId,
-        sessionId: queueSession._id,
-        status: "serving",
-      },
-      {
-        status: "completed",
-        completedAt: new Date(),
-      },
-      {
-        new: true,
-      },
+    const { entry, message } = await completeCurrentCustomer(
+      session.user.id,
+      queueId,
     );
-
-    if (!currentEntry) {
-      return NextResponse.json(
-        {
-          success: false,
-          message: "No customer is currently being served",
-        },
-        { status: 400 },
-      );
-    }
-    const io = getIO();
-
-    io?.to(`queue:${queueId}`).emit("queueUpdated", {
-      currentToken: currentEntry.tokenNumber,
-    });
 
     return NextResponse.json({
       success: true,
-      message: `Token #${currentEntry.tokenNumber} completed`,
-      entry: currentEntry,
+      message,
+      entry,
     });
   } catch (error) {
+    if (error instanceof QueueOperationError) {
+      return NextResponse.json(
+        {
+          success: false,
+          message: error.message,
+        },
+        { status: error.statusCode },
+      );
+    }
+
     console.error("Complete customer error:", error);
 
     return NextResponse.json(

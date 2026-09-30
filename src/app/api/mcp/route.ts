@@ -65,7 +65,12 @@ const protectedMcpHandler = requireMcpAuth(
   },
   {
     resource: process.env.MCP_RESOURCE_URL!,
+    // Every request still needs `mcp:read` (Stage 1 behavior is unchanged);
+    // `mcp:write` is enforced per tool inside `registerQueueTools`. Both are
+    // advertised in the 401 challenge so MCP clients know they can ask for the
+    // write scope.
     requiredScopes: ["mcp:read"],
+    challengeScopes: ["mcp:read", "mcp:write"],
   }
 );
 

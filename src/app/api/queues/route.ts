@@ -3,6 +3,10 @@ import { getSession } from "@/lib/auth";
 import Business from "@/models/Business";
 import Queue from "@/models/Queue";
 import { NextResponse } from "next/server";
+import {
+  QueueOperationError,
+  createQueueForOwner,
+} from "@/lib/queueMutations";
 
 export async function GET() {
   try {
@@ -75,35 +79,7 @@ export async function POST(request: Request) {
 
     const body = await request.json();
 
-    if (!body.name || !body.slug) {
-      return NextResponse.json(
-        {
-          success: false,
-          message: "Name and slug are required",
-        },
-        { status: 400 },
-      );
-    }
-
-    const business = await Business.findOne({
-      ownerId: session.user.id,
-    });
-
-    if (!business) {
-      return NextResponse.json(
-        {
-          success: false,
-          message: "Business not found",
-        },
-        { status: 404 },
-      );
-    }
-
-    const queue = await Queue.create({
-      businessId: business._id,
-      name: body.name,
-      slug: body.slug,
-    });
+    const { queue } = await createQueueForOwner(session.user.id, body);
 
     return NextResponse.json(
       {
@@ -113,6 +89,16 @@ export async function POST(request: Request) {
       { status: 201 },
     );
   } catch (error) {
+    if (error instanceof QueueOperationError) {
+      return NextResponse.json(
+        {
+          success: false,
+          message: error.message,
+        },
+        { status: error.statusCode },
+      );
+    }
+
     console.error("Create queue error:", error);
 
     return NextResponse.json(

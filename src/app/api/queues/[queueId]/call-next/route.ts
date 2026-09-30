@@ -1,8 +1,9 @@
-import QueueEntry from "@/models/QueueEntry";
-import { getIO } from "@/lib/socket";
 import { NextResponse } from "next/server";
 import { getAuthorizedQueue } from "@/lib/authorization";
-import { getOrCreateQueueSession } from "@/lib/queueSession";
+import {
+  QueueOperationError,
+  callNextCustomer,
+} from "@/lib/queueMutations";
 
 export async function POST(
   request: Request,
@@ -38,86 +39,28 @@ export async function POST(
         { status: 404 },
       );
     }
-   
 
-    const queueSession = await getOrCreateQueueSession(queueId);
-    if (!queueSession) {
-      return NextResponse.json(
-        {
-          success: false,
-          message: "Failed to get today's queue session",
-        },
-        { status: 500 },
-      );
-    }
-
-    if (queueSession.status === "closed") {
-      return NextResponse.json(
-        {
-          success: false,
-          message: "This queue is closed",
-        },
-        { status: 400 },
-      );
-    }
-
-    const currentEntry = await QueueEntry.findOne({
+    const { entry, message } = await callNextCustomer(
+      session.user.id,
       queueId,
-      sessionId: queueSession._id,
-      status: "serving",
-    });
-
-    if (currentEntry) {
-      return NextResponse.json(
-        {
-          success: false,
-          message: "A customer is already being served",
-        },
-        { status: 400 },
-      );
-    }
-
-    const nextEntry = await QueueEntry.findOneAndUpdate(
-      {
-        queueId,
-        sessionId: queueSession._id,
-        status: "waiting",
-      },
-      {
-        status: "serving",
-        calledAt: new Date(),
-      },
-      {
-        sort: { tokenNumber: 1 },
-        new: true,
-      },
     );
-
-    if (!nextEntry) {
-      return NextResponse.json(
-        {
-          success: false,
-          message: "No customers waiting",
-        },
-        { status: 400 },
-      );
-    }
-
-    queueSession.currentToken = nextEntry.tokenNumber;
-    await queueSession.save();
-
-    const io = getIO();
-
-    io?.to(`queue:${queueId}`).emit("queueUpdated", {
-      currentToken: queueSession.currentToken,
-    });
 
     return NextResponse.json({
       success: true,
-      message: `Token #${nextEntry.tokenNumber} is now being served`,
-      entry: nextEntry,
+      message,
+      entry,
     });
   } catch (error) {
+    if (error instanceof QueueOperationError) {
+      return NextResponse.json(
+        {
+          success: false,
+          message: error.message,
+        },
+        { status: error.statusCode },
+      );
+    }
+
     console.error("Call next error:", error);
 
     return NextResponse.json(

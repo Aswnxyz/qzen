@@ -8,13 +8,21 @@ import * as z from "zod/v4";
 
 import { getBusinessByOwner, getQueueForOwner } from "@/lib/authorization";
 import { getDateKey, getQueueSessionForDate } from "@/lib/queueSession";
+import {
+  QueueOperationError,
+  callNextCustomer,
+  completeCurrentCustomer,
+  createQueueForOwner,
+  getQueueStatuses,
+  setQueueStatus,
+  skipCurrentCustomer,
+} from "@/lib/queueMutations";
 import Queue from "@/models/Queue";
 import QueueEntry from "@/models/QueueEntry";
 
 /**
- * Every tool registered here is strictly read-only: they only ever run
- * `find`/`countDocuments` queries and never create or mutate sessions,
- * entries or queues.
+ * Read tools only ever run `find`/`countDocuments` queries and never create or
+ * mutate sessions, entries or queues.
  */
 const READ_ONLY_ANNOTATIONS = {
   readOnlyHint: true,
@@ -22,6 +30,48 @@ const READ_ONLY_ANNOTATIONS = {
   idempotentHint: true,
   openWorldHint: false,
 } as const;
+
+/**
+ * A mutation that adds or advances state without destroying anything, and
+ * whose result depends on when it runs — calling it twice is never the same as
+ * calling it once. Used by `create_queue` and `call_next_customer`.
+ */
+const MUTATION_ANNOTATIONS = {
+  readOnlyHint: false,
+  destructiveHint: false,
+  idempotentHint: false,
+  openWorldHint: false,
+} as const;
+
+/**
+ * A reversible status change: applying the same status twice leaves the queue
+ * in the same state, so the call is idempotent and non-destructive.
+ */
+const STATUS_ANNOTATIONS = {
+  readOnlyHint: false,
+  destructiveHint: false,
+  idempotentHint: true,
+  openWorldHint: false,
+} as const;
+
+/**
+ * A terminal transition. Completing or skipping closes out the customer that
+ * is being served for good, so `destructiveHint` is accurate here rather than
+ * the default.
+ */
+const TERMINAL_ANNOTATIONS = {
+  readOnlyHint: false,
+  destructiveHint: true,
+  idempotentHint: false,
+  openWorldHint: false,
+} as const;
+
+/**
+ * The write scope checked per tool. `requireMcpAuth` already requires
+ * `mcp:read` for every request to this route; `mcp:write` is checked inside
+ * each write tool so a read-only token can list them but never invoke them.
+ */
+const MCP_WRITE_SCOPE = "mcp:write";
 
 const DEFAULT_TIMEZONE = "Asia/Kolkata";
 
@@ -149,14 +199,41 @@ function toolError(message: string): CallToolResult {
   };
 }
 
-function handleToolError(error: unknown): CallToolResult {
+function handleToolError(
+  error: unknown,
+  fallbackMessage = "Failed to read queue data.",
+): CallToolResult {
   if (error instanceof ToolInputError) {
+    return toolError(error.message);
+  }
+
+  // `QueueOperationError` carries a message Qzen already returns from its HTTP
+  // API for the same condition, so it is safe to show the caller as-is.
+  if (error instanceof QueueOperationError) {
     return toolError(error.message);
   }
 
   console.error("MCP tool error:", error);
 
-  return toolError("Failed to read queue data.");
+  return toolError(fallbackMessage);
+}
+
+function getScopes(authInfo?: AuthInfo) {
+  return Array.isArray(authInfo?.scopes) ? authInfo.scopes : [];
+}
+
+/**
+ * Rejects a tool call made with a token that lacks `mcp:write`.
+ *
+ * Runs before any database work, so a read-scoped token cannot even resolve the
+ * queue it points at.
+ */
+function requireWriteScope(scopes: string[]) {
+  if (!scopes.includes(MCP_WRITE_SCOPE)) {
+    throw new ToolInputError(
+      `Insufficient scope: this tool requires the ${MCP_WRITE_SCOPE} scope.`,
+    );
+  }
 }
 
 /**
@@ -225,6 +302,13 @@ async function getTodayContext(
 
 export function registerQueueTools(server: McpServer, authInfo?: AuthInfo) {
   const ownerId = getAuthenticatedUserId(authInfo);
+  const writeScopes = getScopes(authInfo);
+  const queueStatusValues = getQueueStatuses();
+
+  const statusDescription =
+    queueStatusValues.length > 0
+      ? `New status for the queue. Allowed values: ${queueStatusValues.join(", ")}.`
+      : "New status for the queue.";
 
   server.registerTool(
     "list_queues",
@@ -413,6 +497,196 @@ export function registerQueueTools(server: McpServer, authInfo?: AuthInfo) {
         });
       } catch (error) {
         return handleToolError(error);
+      }
+    },
+  );
+
+  /**
+   * Write tools.
+   *
+   * `ownerId` always comes from the verified access-token claims, and every
+   * operation below re-checks it inside `queueMutations` before touching the
+   * database. Nothing the client sends is ever treated as identity or
+   * authority, and a queue owned by another business reports exactly the same
+   * error as one that does not exist.
+   */
+  server.registerTool(
+    "create_queue",
+    {
+      title: "Create queue",
+      description:
+        "Creates a queue under the authenticated user's own business. Requires the mcp:write scope. The business is resolved from the verified identity, so no businessId is ever accepted from the caller.",
+      inputSchema: z.object({
+        name: z.string().min(1).describe("Display name for the new queue."),
+        slug: z
+          .string()
+          .min(1)
+          .describe("URL slug for the queue, for example morning-desk."),
+      }),
+      annotations: MUTATION_ANNOTATIONS,
+    },
+    async ({ name, slug }) => {
+      try {
+        requireWriteScope(writeScopes);
+
+        if (!ownerId) {
+          throw new ToolInputError("Not authenticated.");
+        }
+
+        const { queue } = await createQueueForOwner(ownerId, { name, slug });
+
+        return toolResult({
+          success: true,
+          queue: serializeQueue(queue),
+        });
+      } catch (error) {
+        return handleToolError(error, "Failed to create queue");
+      }
+    },
+  );
+
+  server.registerTool(
+    "update_queue_status",
+    {
+      title: "Update queue status",
+      description:
+        "Sets the status of an owned queue and mirrors it onto today's session. Requires the mcp:write scope.",
+      inputSchema: z.object({
+        queueId: z.string().describe("The id of the queue to update."),
+        status: z.string().describe(statusDescription),
+      }),
+      annotations: STATUS_ANNOTATIONS,
+    },
+    async ({ queueId, status }) => {
+      try {
+        requireWriteScope(writeScopes);
+
+        if (!ownerId) {
+          throw new ToolInputError("Not authenticated.");
+        }
+
+        const { queue, queueSession } = await setQueueStatus(
+          ownerId,
+          queueId,
+          status,
+        );
+
+        return toolResult({
+          success: true,
+          queue: serializeQueue(queue),
+          session: serializeSession(queueSession),
+        });
+      } catch (error) {
+        return handleToolError(error, "Failed to update queue status");
+      }
+    },
+  );
+
+  server.registerTool(
+    "call_next_customer",
+    {
+      title: "Call next customer",
+      description:
+        "Calls the lowest-token waiting customer on an owned queue and makes them the one being served. Requires the mcp:write scope.",
+      inputSchema: z.object({
+        queueId: z.string().describe("The id of the queue to advance."),
+      }),
+      annotations: MUTATION_ANNOTATIONS,
+    },
+    async ({ queueId }) => {
+      try {
+        requireWriteScope(writeScopes);
+
+        if (!ownerId) {
+          throw new ToolInputError("Not authenticated.");
+        }
+
+        const { queue, queueSession, entry, message } = await callNextCustomer(
+          ownerId,
+          queueId,
+        );
+
+        return toolResult({
+          success: true,
+          message,
+          queue: serializeQueue(queue),
+          session: serializeSession(queueSession),
+          entry: serializeEntry(entry),
+        });
+      } catch (error) {
+        return handleToolError(error, "Failed to call next customer");
+      }
+    },
+  );
+
+  server.registerTool(
+    "complete_current_customer",
+    {
+      title: "Complete current customer",
+      description:
+        "Completes the customer that is currently being served on an owned queue, and only that customer. Requires the mcp:write scope.",
+      inputSchema: z.object({
+        queueId: z.string().describe("The id of the queue."),
+      }),
+      annotations: TERMINAL_ANNOTATIONS,
+    },
+    async ({ queueId }) => {
+      try {
+        requireWriteScope(writeScopes);
+
+        if (!ownerId) {
+          throw new ToolInputError("Not authenticated.");
+        }
+
+        const { queue, queueSession, entry, message } =
+          await completeCurrentCustomer(ownerId, queueId);
+
+        return toolResult({
+          success: true,
+          message,
+          queue: serializeQueue(queue),
+          session: serializeSession(queueSession),
+          entry: serializeEntry(entry),
+        });
+      } catch (error) {
+        return handleToolError(error, "Failed to complete customer");
+      }
+    },
+  );
+
+  server.registerTool(
+    "skip_current_customer",
+    {
+      title: "Skip current customer",
+      description:
+        "Skips the customer that is currently being served on an owned queue, and only that customer. Requires the mcp:write scope.",
+      inputSchema: z.object({
+        queueId: z.string().describe("The id of the queue."),
+      }),
+      annotations: TERMINAL_ANNOTATIONS,
+    },
+    async ({ queueId }) => {
+      try {
+        requireWriteScope(writeScopes);
+
+        if (!ownerId) {
+          throw new ToolInputError("Not authenticated.");
+        }
+
+        const { queue, queueSession, entry, message } = await skipCurrentCustomer(
+          ownerId,
+          queueId,
+        );
+
+        return toolResult({
+          success: true,
+          message,
+          queue: serializeQueue(queue),
+          session: serializeSession(queueSession),
+          entry: serializeEntry(entry),
+        });
+      } catch (error) {
+        return handleToolError(error, "Failed to skip customer");
       }
     },
   );
