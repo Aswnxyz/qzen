@@ -119,12 +119,32 @@ export function toIsoDate(value: unknown): string | null {
   return Number.isNaN(date.getTime()) ? null : date.toISOString();
 }
 
-export function serializeQueue(queue: QueueRecord) {
+/**
+ * Today's operational status of a queue: the status of today's session, or
+ * `closed` when today has no session yet.
+ *
+ * This is exactly what the dashboard's Queues page renders
+ * (`queueSession?.status ?? "closed"`). The persistent `Queue.status` can still
+ * hold yesterday's value — a new day's session starts as `closed` — so MCP
+ * reports this effective status instead of it.
+ */
+export function getOperationalStatus(
+  session?: { status?: string } | null,
+): string {
+  return session?.status ?? "closed";
+}
+
+/**
+ * `status` overrides the stored `Queue.status` with today's operational status
+ * (see `getOperationalStatus`); callers that pass nothing keep reporting the
+ * queue document's own value.
+ */
+export function serializeQueue(queue: QueueRecord, status?: string) {
   return {
     id: String(queue._id),
     name: queue.name ?? "",
     slug: queue.slug ?? "",
-    status: queue.status ?? "active",
+    status: status ?? queue.status ?? "active",
     currentToken: queue.currentToken ?? 0,
     averageServiceTime: queue.averageServiceTime ?? 0,
     createdAt: toIsoDate(queue.createdAt),

@@ -10,6 +10,7 @@ import {
   TERMINAL_ANNOTATIONS,
   ToolInputError,
   getAuthenticatedUserId,
+  getOperationalStatus,
   getScopes,
   getTodayContext,
   handleToolError,
@@ -30,8 +31,10 @@ import {
   skipCurrentCustomer,
   updateQueueForOwner,
 } from "@/lib/queueMutations";
+import { getDateKey } from "@/lib/queueSession";
 import Queue from "@/models/Queue";
 import QueueEntry from "@/models/QueueEntry";
+import QueueSession from "@/models/QueueSession";
 
 export function registerQueueTools(server: McpServer, authInfo?: AuthInfo) {
   const ownerId = getAuthenticatedUserId(authInfo);
@@ -48,7 +51,7 @@ export function registerQueueTools(server: McpServer, authInfo?: AuthInfo) {
     {
       title: "List queues",
       description:
-        "Lists every queue that belongs to the authenticated business, excluding queues that have been deleted.",
+        "Lists every queue that belongs to the authenticated business, excluding queues that have been deleted. Each queue's status is its operational status for today: the status of today's session, or closed when today has no session yet.",
       inputSchema: z.object({}),
       annotations: READ_ONLY_ANNOTATIONS,
     },
@@ -64,6 +67,8 @@ export function registerQueueTools(server: McpServer, authInfo?: AuthInfo) {
           throw new ToolInputError("No business found for this account.");
         }
 
+        const timezone = business.timezone || DEFAULT_TIMEZONE;
+
         const queues = await Queue.find({
           businessId: business._id,
           deletedAt: null,
@@ -71,16 +76,39 @@ export function registerQueueTools(server: McpServer, authInfo?: AuthInfo) {
           .sort({ createdAt: 1 })
           .lean();
 
+        // One extra query for every queue at once — never one per queue. A
+        // queue without a session for today reports `closed`, the same rule the
+        // dashboard's Queues page applies.
+        const dateKey = getDateKey(timezone);
+        const queueIds = queues.map((queue) => queue._id);
+
+        const todaySessions =
+          queueIds.length === 0
+            ? []
+            : await QueueSession.find({
+                queueId: { $in: queueIds },
+                dateKey,
+              }).lean();
+
+        const sessionByQueueId = new Map(
+          todaySessions.map((session) => [String(session.queueId), session]),
+        );
+
         return toolResult({
           success: true,
           business: {
             id: String(business._id),
             name: business.name,
             slug: business.slug,
-            timezone: business.timezone || DEFAULT_TIMEZONE,
+            timezone,
           },
           count: queues.length,
-          queues: queues.map((queue) => serializeQueue(queue)),
+          queues: queues.map((queue) =>
+            serializeQueue(
+              queue,
+              getOperationalStatus(sessionByQueueId.get(String(queue._id))),
+            ),
+          ),
         });
       } catch (error) {
         return handleToolError(error);
@@ -135,7 +163,7 @@ export function registerQueueTools(server: McpServer, authInfo?: AuthInfo) {
 
         return toolResult({
           success: true,
-          queue: serializeQueue(queue),
+          queue: serializeQueue(queue, getOperationalStatus(session)),
           timezone,
           dateKey,
           exists: Boolean(session),
@@ -180,7 +208,7 @@ export function registerQueueTools(server: McpServer, authInfo?: AuthInfo) {
 
         return toolResult({
           success: true,
-          queue: serializeQueue(queue),
+          queue: serializeQueue(queue, getOperationalStatus(session)),
           timezone,
           dateKey,
           session: session ? serializeSession(session) : null,
@@ -217,7 +245,7 @@ export function registerQueueTools(server: McpServer, authInfo?: AuthInfo) {
 
         return toolResult({
           success: true,
-          queue: serializeQueue(queue),
+          queue: serializeQueue(queue, getOperationalStatus(session)),
           timezone,
           dateKey,
           exists: Boolean(session),
