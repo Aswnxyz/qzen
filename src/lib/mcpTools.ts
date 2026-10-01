@@ -24,9 +24,11 @@ import {
   callNextCustomer,
   completeCurrentCustomer,
   createQueueForOwner,
+  deleteQueueForOwner,
   getQueueStatuses,
   setQueueStatus,
   skipCurrentCustomer,
+  updateQueueForOwner,
 } from "@/lib/queueMutations";
 import Queue from "@/models/Queue";
 import QueueEntry from "@/models/QueueEntry";
@@ -46,7 +48,7 @@ export function registerQueueTools(server: McpServer, authInfo?: AuthInfo) {
     {
       title: "List queues",
       description:
-        "Lists every queue that belongs to the authenticated business.",
+        "Lists every queue that belongs to the authenticated business, excluding queues that have been deleted.",
       inputSchema: z.object({}),
       annotations: READ_ONLY_ANNOTATIONS,
     },
@@ -64,6 +66,7 @@ export function registerQueueTools(server: McpServer, authInfo?: AuthInfo) {
 
         const queues = await Queue.find({
           businessId: business._id,
+          deletedAt: null,
         })
           .sort({ createdAt: 1 })
           .lean();
@@ -277,6 +280,40 @@ export function registerQueueTools(server: McpServer, authInfo?: AuthInfo) {
   );
 
   server.registerTool(
+    "update_queue",
+    {
+      title: "Update queue",
+      description:
+        "Renames a queue on the authenticated user's own business. Requires the mcp:write scope. The name is the only field that can be updated: the queue slug is never accepted as input because it is the public join URL and QR code target.",
+      inputSchema: z.object({
+        queueId: z.string().describe("The id of the queue to rename."),
+        name: z.string().min(1).describe("New display name for the queue."),
+      }),
+      annotations: STATUS_ANNOTATIONS,
+    },
+    async ({ queueId, name }) => {
+      try {
+        requireWriteScope(writeScopes);
+
+        if (!ownerId) {
+          throw new ToolInputError("Not authenticated.");
+        }
+
+        const { queue } = await updateQueueForOwner(ownerId, queueId, {
+          name,
+        });
+
+        return toolResult({
+          success: true,
+          queue: serializeQueue(queue),
+        });
+      } catch (error) {
+        return handleToolError(error, "Failed to update queue");
+      }
+    },
+  );
+
+  server.registerTool(
     "update_queue_status",
     {
       title: "Update queue status",
@@ -418,6 +455,43 @@ export function registerQueueTools(server: McpServer, authInfo?: AuthInfo) {
         });
       } catch (error) {
         return handleToolError(error, "Failed to skip customer");
+      }
+    },
+  );
+
+  /**
+   * Soft delete, mirroring the dashboard's Delete queue action: the queue stops
+   * being a live queue and can no longer be read or joined, while its sessions,
+   * customer entries and all history stay in the database.
+   */
+  server.registerTool(
+    "delete_queue",
+    {
+      title: "Delete queue",
+      description:
+        "Deletes a queue on the authenticated user's own business. Requires the mcp:write scope. The queue stops being a live queue: it leaves the queue lists and can no longer be joined, while its sessions, customer entries and history are kept.",
+      inputSchema: z.object({
+        queueId: z.string().describe("The id of the queue to delete."),
+      }),
+      annotations: TERMINAL_ANNOTATIONS,
+    },
+    async ({ queueId }) => {
+      try {
+        requireWriteScope(writeScopes);
+
+        if (!ownerId) {
+          throw new ToolInputError("Not authenticated.");
+        }
+
+        const { queue } = await deleteQueueForOwner(ownerId, queueId);
+
+        return toolResult({
+          success: true,
+          message: "Queue deleted. Its history was kept.",
+          queue: serializeQueue(queue),
+        });
+      } catch (error) {
+        return handleToolError(error, "Failed to delete queue");
       }
     },
   );

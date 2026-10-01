@@ -1,4 +1,6 @@
 import { connectDB } from "@/lib/db";
+import { updateBusinessSettingsForOwner } from "@/lib/businessMutations";
+import { QueueOperationError } from "@/lib/queueMutations";
 import Business from "@/models/Business";
 import { getSession } from "@/lib/auth";
 import { NextResponse } from "next/server";
@@ -71,92 +73,28 @@ export async function PATCH(request: Request) {
       );
     }
 
-    await connectDB();
-
     const body = await request.json();
 
-    const name = body?.name?.trim();
-    const timezone = body?.timezone?.trim();
-
-    if (!name) {
-      return NextResponse.json(
-        {
-          success: false,
-          message: "Business name is required.",
-        },
-        { status: 400 },
-      );
-    }
-
-    if (!timezone) {
-      return NextResponse.json(
-        {
-          success: false,
-          message: "Timezone is required.",
-        },
-        { status: 400 },
-      );
-    }
-
-    const supportedTimezones = [
-      "Asia/Kolkata",
-      "Asia/Dubai",
-      "Asia/Singapore",
-      "Asia/Tokyo",
-      "Asia/Shanghai",
-      "Europe/London",
-      "Europe/Berlin",
-      "Europe/Paris",
-      "America/New_York",
-      "America/Chicago",
-      "America/Denver",
-      "America/Los_Angeles",
-      "Australia/Sydney",
-      "Pacific/Auckland",
-      "UTC",
-    ];
-
-    if (!supportedTimezones.includes(timezone)) {
-      return NextResponse.json(
-        {
-          success: false,
-          message: "Invalid timezone.",
-        },
-        { status: 400 },
-      );
-    }
-
-    const business = await Business.findOneAndUpdate(
-      {
-        ownerId: session.user.id,
-      },
-      {
-        $set: {
-          name,
-          timezone,
-        },
-      },
-      {
-        new: true,
-        runValidators: true,
-      },
-    ).lean();
-
-    if (!business) {
-      return NextResponse.json(
-        {
-          success: false,
-          message: "Business not found.",
-        },
-        { status: 404 },
-      );
-    }
+    const { business } = await updateBusinessSettingsForOwner(
+      session.user.id,
+      body,
+    );
 
     return NextResponse.json({
       success: true,
       business,
     });
   } catch (error) {
+    if (error instanceof QueueOperationError) {
+      return NextResponse.json(
+        {
+          success: false,
+          message: error.message,
+        },
+        { status: error.statusCode },
+      );
+    }
+
     console.error("Update business error:", error);
 
     return NextResponse.json(

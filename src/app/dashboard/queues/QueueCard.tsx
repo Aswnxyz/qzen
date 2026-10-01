@@ -282,8 +282,14 @@ export default function QueueCard({
           </div>
         </div>
 
-        {/* Actions */}
-        <div className="pointer-events-auto relative z-20 flex justify-end border-t border-qz-line pt-3 lg:min-w-[120px] lg:border-t-0 lg:pt-0">
+        {/* Actions — while the menu is open this slot is stacked above the
+            sibling cards, so their ⋯ triggers can never paint over the open
+            dropdown (equal z-indexes are resolved by DOM order). */}
+        <div
+          className={`pointer-events-auto relative flex justify-end border-t border-qz-line pt-3 lg:min-w-[120px] lg:border-t-0 lg:pt-0 ${
+            menuOpen ? "z-40" : "z-20"
+          }`}
+        >
           <div ref={menuRef} className="relative">
             <button
               type="button"

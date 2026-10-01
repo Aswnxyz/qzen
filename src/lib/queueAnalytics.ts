@@ -392,6 +392,8 @@ function summarizeQueue(queue: {
  *
  * Takes no queue id on purpose: there is nothing for a caller to name, so
  * there is nothing to authorize beyond proving the account has a business.
+ * It reports the live queues only — soft-deleted queues are excluded, exactly
+ * like `list_queues`.
  */
 export async function getTodaySummaryForOwner(
   ownerId: string,
@@ -405,7 +407,13 @@ export async function getTodaySummaryForOwner(
   const timezone = business.timezone || "Asia/Kolkata";
   const dateKey = getDateKey(timezone);
 
-  const queues = await Queue.find({ businessId: business._id }).lean();
+  // Today's summary describes the queues the business currently has, so
+  // soft-deleted queues are excluded the same way `list_queues` excludes them;
+  // nothing about a past day or a stored history document is touched.
+  const queues = await Queue.find({
+    businessId: business._id,
+    deletedAt: null,
+  }).lean();
 
   const queueIds = queues.map((queue: { _id: unknown }) => queue._id);
 

@@ -3,6 +3,7 @@ import { requireMcpAuth } from "@better-auth/mcp";
 import { McpServer, createMcpHandler } from "@modelcontextprotocol/server";
 import { corsPreflight, withCors } from "@/lib/cors";
 import { registerAnalyticsTools } from "@/lib/mcpAnalyticsTools";
+import { registerBusinessTools } from "@/lib/mcpBusinessTools";
 import { registerQueueTools } from "@/lib/mcpTools";
 import * as z from "zod/v4";
 
@@ -34,6 +35,7 @@ const mcpHandler = createMcpHandler(async ({ authInfo }) => {
 
   registerQueueTools(server, authInfo);
   registerAnalyticsTools(server, authInfo);
+  registerBusinessTools(server, authInfo);
 
   return server;
 });
