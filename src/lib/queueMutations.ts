@@ -1,6 +1,11 @@
 import { getBusinessByOwner, getQueueForOwner } from "@/lib/authorization";
 import { getIO } from "@/lib/socket";
 import { getOrCreateQueueSession } from "@/lib/queueSession";
+import { notifyCustomer } from "@/lib/notifications/push";
+import {
+  removeSubscriptionsForEntry,
+  removeSubscriptionsForQueue,
+} from "@/lib/notifications/subscription";
 import mongoose from "mongoose";
 import Queue from "@/models/Queue";
 import QueueEntry from "@/models/QueueEntry";
@@ -170,6 +175,10 @@ export async function deleteQueueForOwner(ownerId: string, queueId: string) {
 
   emitQueueUpdated(queueId, { status: "closed" });
 
+  // The queue can never be joined or called from again: its subscriptions
+  // are dead weight regardless of their entries' states.
+  void removeSubscriptionsForQueue(queueId);
+
   return { queue };
 }
 
@@ -222,7 +231,7 @@ export async function setQueueStatus(
  * `currentToken` bookkeeping are exactly what `POST /call-next` does.
  */
 export async function callNextCustomer(ownerId: string, queueId: string) {
-  const { queue } = await requireOwnedQueue(ownerId, queueId);
+  const { business, queue } = await requireOwnedQueue(ownerId, queueId);
 
   const queueSession = await getOrCreateQueueSession(queueId);
 
@@ -269,6 +278,19 @@ export async function callNextCustomer(ownerId: string, queueId: string) {
 
   emitQueueUpdated(queueId, { currentToken: queueSession.currentToken });
 
+  // Browser push: fire-and-forget, after the atomic waiting → serving
+  // transition that only one concurrent caller can win, so a doubled
+  // request can never produce a second notification.
+  void notifyCustomer({
+    type: "TOKEN_CALLED",
+    queueEntryId: nextEntry._id.toString(),
+    queueId,
+    tokenNumber: nextEntry.tokenNumber,
+    url: `/join/${business.slug}/${queue.slug}`,
+    businessName: business.name,
+    queueName: queue.name,
+  });
+
   return {
     queue,
     queueSession,
@@ -311,6 +333,9 @@ export async function completeCurrentCustomer(
     throw new QueueOperationError("No customer is currently being served");
   }
 
+  // Terminal state: this ticket can never be called again.
+  void removeSubscriptionsForEntry(currentEntry._id.toString());
+
   emitQueueUpdated(queueId, { currentToken: currentEntry.tokenNumber });
 
   return {
@@ -351,6 +376,9 @@ export async function skipCurrentCustomer(ownerId: string, queueId: string) {
   if (!currentEntry) {
     throw new QueueOperationError("No customer is currently being served");
   }
+
+  // Terminal state: this ticket can never be called again.
+  void removeSubscriptionsForEntry(currentEntry._id.toString());
 
   emitQueueUpdated(queueId, { currentToken: currentEntry.tokenNumber });
 

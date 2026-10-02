@@ -12,6 +12,7 @@ import QueueTicket, {
   QueueTicketSkeleton,
   type TicketStatus,
 } from "@/components/customer/QueueTicket";
+import NotificationOptIn from "@/components/customer/NotificationOptIn";
 import { Field } from "@/components/customer/ui";
 import {
   cardClass,
@@ -237,15 +238,26 @@ export default function JoinQueueForm({
         : "waiting";
 
     return (
-      <QueueTicket
-        businessName={businessName}
-        queueName={queueName}
-        tokenNumber={tokenNumber}
-        currentToken={currentToken}
-        peopleAhead={peopleAhead}
-        estimatedWait={estimatedWait}
-        status={ticketStatus}
-      />
+      <div className="flex w-full max-w-md flex-col">
+        <QueueTicket
+          businessName={businessName}
+          queueName={queueName}
+          tokenNumber={tokenNumber}
+          currentToken={currentToken}
+          peopleAhead={peopleAhead}
+          estimatedWait={estimatedWait}
+          status={ticketStatus}
+        />
+
+        {/* Only while waiting: once served or finished there is nothing
+            left to announce, and the subscribe API would reject it. */}
+        {ticketStatus === "waiting" ? (
+          <NotificationOptIn
+            queueId={queueId}
+            queueEntryId={entryId}
+          />
+        ) : null}
+      </div>
     );
   }
 
