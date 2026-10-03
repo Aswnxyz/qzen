@@ -146,6 +146,56 @@ async function claimStatusTransition(
 }
 
 /**
+ * Decides which of several concurrent `callNextCustomer` requests really
+ * gets to serve a customer, and hands the entry back when it does not.
+ *
+ * The promotion of the lowest waiting entry is already a single atomic
+ * update, but "nobody is being served yet" is a property of the whole
+ * session rather than of that one document. So two requests that both read
+ * past the sequential guard can each promote somebody: the slower one only
+ * becomes eligible once the faster one has already left `waiting`.
+ *
+ * The turn is therefore claimed the same way `claimStatusTransition` claims a
+ * status change — a conditional update whose filter encodes the state that
+ * must still hold, with a null result meaning "lost the race". The caller
+ * holding the front of the queue keeps its entry (the lowest token, `_id`
+ * breaking a tie, so the order is total and exactly one caller can win);
+ * every other caller restores its own entry to `waiting` while it is still
+ * `serving` and reports the same error the sequential guard uses.
+ *
+ * Returns true when `entry` really owns the turn.
+ */
+async function claimServingTurn(
+  queueId: string,
+  sessionId: string,
+  entry: { _id: mongoose.Types.ObjectId; tokenNumber: number },
+): Promise<boolean> {
+  const ahead = await QueueEntry.findOne({
+    queueId,
+    sessionId,
+    status: "serving",
+    _id: { $ne: entry._id },
+    $or: [
+      { tokenNumber: { $lt: entry.tokenNumber } },
+      { tokenNumber: entry.tokenNumber, _id: { $lt: entry._id } },
+    ],
+  })
+    .select("_id")
+    .lean();
+
+  if (!ahead) {
+    return true;
+  }
+
+  await QueueEntry.updateOne(
+    { _id: entry._id, status: "serving" },
+    { $set: { status: "waiting" }, $unset: { calledAt: 1 } },
+  );
+
+  return false;
+}
+
+/**
  * Creates a queue under the business owned by `ownerId`.
  *
  * The business is always resolved from the owner — the caller never supplies a
@@ -386,6 +436,10 @@ export async function setQueueStatus(
  * the "already serving" guard, the closed-session guard and the session's
  * `currentToken` bookkeeping are exactly what `POST /call-next` does.
  *
+ * Overlapping calls are settled by `claimServingTurn`, so exactly one of
+ * them serves a customer and the rest report "already being served" — the
+ * same outcome the guard above produces when calls do not overlap.
+ *
  * A successful call also evaluates `ALMOST_YOUR_TURN` for the customers
  * left waiting, since a call is the only event that moves anyone's
  * position.
@@ -431,6 +485,20 @@ export async function callNextCustomer(ownerId: string, queueId: string) {
 
   if (!nextEntry) {
     throw new QueueOperationError("No customers waiting");
+  }
+
+  // Of several requests that raced past the guard above, exactly one keeps
+  // the customer — see `claimServingTurn`. A loser hands the entry straight
+  // back and stops here, so it never books `currentToken`, never broadcasts
+  // and never notifies anybody.
+  const claimed = await claimServingTurn(
+    queueId,
+    queueSession._id.toString(),
+    nextEntry,
+  );
+
+  if (!claimed) {
+    throw new QueueOperationError("A customer is already being served");
   }
 
   queueSession.currentToken = nextEntry.tokenNumber;
