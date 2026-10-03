@@ -1,11 +1,17 @@
 import { getBusinessByOwner, getQueueForOwner } from "@/lib/authorization";
 import { getIO } from "@/lib/socket";
 import { getOrCreateQueueSession } from "@/lib/queueSession";
+import {
+  buildCustomerUrl,
+  notifyAlmostTurnCustomers,
+  notifyWaitingCustomers,
+} from "@/lib/notifications/dispatch";
 import { notifyCustomer } from "@/lib/notifications/push";
 import {
   removeSubscriptionsForEntry,
   removeSubscriptionsForQueue,
 } from "@/lib/notifications/subscription";
+import type { QueueStateNotificationType } from "@/lib/notifications/types";
 import mongoose from "mongoose";
 import Queue from "@/models/Queue";
 import QueueEntry from "@/models/QueueEntry";
@@ -81,6 +87,65 @@ function emitQueueUpdated(queueId: string, payload: Record<string, unknown>) {
 }
 
 /**
+ * Maps a real queue status transition onto the notification it produces —
+ * `null` means nothing worth announcing happened.
+ *
+ * Only the three transitions a customer can observe are announced: an
+ * active queue that pauses, a paused queue that resumes, and a queue that
+ * closes. Writing the status a queue already has (the dashboard re-sends
+ * the current one) yields `null` before these rules are even considered,
+ * and reopening a closed queue deliberately yields `null` too, so a
+ * repeated PATCH can never re-alert the same waiting customers.
+ */
+function queueStateNotificationType(
+  from: string,
+  to: string,
+): QueueStateNotificationType | null {
+  if (from === to) {
+    return null;
+  }
+
+  if (from === "active" && to === "paused") {
+    return "QUEUE_PAUSED";
+  }
+
+  if (from === "paused" && to === "active") {
+    return "QUEUE_RESUMED";
+  }
+
+  if (to === "closed" && (from === "active" || from === "paused")) {
+    return "QUEUE_CLOSED";
+  }
+
+  return null;
+}
+
+/**
+ * Moves a queue from `from` to `to` with a single conditional update, and
+ * reports whether *this* call performed the move.
+ *
+ * The filter only matches while the document still holds `from`, so of
+ * several requests that raced after reading the same previous status,
+ * exactly one wins. That is what makes a duplicated request — a
+ * double-clicked pause, a dashboard retry, a delete racing a status
+ * change — write what it was asked to write but announce the transition
+ * once: the losers stay silent, because the request whose write matched
+ * is the one that reports it.
+ */
+async function claimStatusTransition(
+  queueId: string,
+  from: string,
+  to: string,
+  extra: Record<string, unknown> = {},
+) {
+  return Queue.findOneAndUpdate(
+    { _id: queueId, status: from },
+    { $set: { status: to, ...extra } },
+    { new: true },
+  );
+}
+
+/**
  * Creates a queue under the business owned by `ownerId`.
  *
  * The business is always resolved from the owner — the caller never supplies a
@@ -152,13 +217,42 @@ export async function updateQueueForOwner(
  *
  * Ownership is proven by `requireOwnedQueue` before anything is written, so a
  * queue id from another business behaves exactly like one that does not exist.
+ *
+ * Customers still waiting are told the queue closed before their
+ * subscriptions are dropped — see `queueStateNotificationType` for which
+ * transitions produce a notification.
  */
 export async function deleteQueueForOwner(ownerId: string, queueId: string) {
-  const { queue } = await requireOwnedQueue(ownerId, queueId);
+  const { business, queue } = await requireOwnedQueue(ownerId, queueId);
 
-  queue.status = "closed";
-  queue.deletedAt = new Date();
-  await queue.save();
+  // Captured before the write so a queue that was already closed does not
+  // re-alert customers who were told about it the first time.
+  const previousStatus = queue.status;
+
+  // A soft-delete is also a real move into `closed`, so it is claimed
+  // through the same atomic transition as `setQueueStatus`: of several
+  // concurrent requests only one announces, and the delete marker lands
+  // regardless — a delete always deletes.
+  const claimed = await claimStatusTransition(queueId, previousStatus, "closed", {
+    deletedAt: new Date(),
+  });
+
+  if (claimed) {
+    queue.status = claimed.status;
+    queue.deletedAt = claimed.deletedAt;
+  } else {
+    await Queue.updateOne(
+      { _id: queueId },
+      { $set: { status: "closed", deletedAt: new Date() } },
+    );
+
+    const latest = await Queue.findById(queueId);
+
+    if (latest) {
+      queue.status = latest.status;
+      queue.deletedAt = latest.deletedAt;
+    }
+  }
 
   await QueueSession.updateMany(
     {
@@ -175,6 +269,28 @@ export async function deleteQueueForOwner(ownerId: string, queueId: string) {
 
   emitQueueUpdated(queueId, { status: "closed" });
 
+  // Tell the customers still waiting that the queue is gone — but only
+  // when this request is the one that actually closed it. Awaited (the
+  // helper never throws) purely so the push is not raced by the
+  // subscription cleanup below.
+  const notificationType = claimed
+    ? queueStateNotificationType(previousStatus, "closed")
+    : null;
+
+  if (notificationType) {
+    const queueSession = await getOrCreateQueueSession(queueId);
+
+    if (queueSession) {
+      await notifyWaitingCustomers({
+        type: notificationType,
+        queueId,
+        sessionId: queueSession._id.toString(),
+        business,
+        queue,
+      });
+    }
+  }
+
   // The queue can never be joined or called from again: its subscriptions
   // are dead weight regardless of their entries' states.
   void removeSubscriptionsForQueue(queueId);
@@ -189,17 +305,25 @@ export async function deleteQueueForOwner(ownerId: string, queueId: string) {
  * including `closedAt` bookkeeping and the `queueUpdated` broadcast — are the
  * ones `PATCH /api/queues/[queueId]/status` already applies. `getOrCreateQueueSession`
  * is reused as-is, so sessions are never duplicated.
+ *
+ * After the transition succeeds, the customers still `waiting` are told
+ * about it (see `queueStateNotificationType`). Nothing is sent for a write
+ * that leaves the status unchanged.
  */
 export async function setQueueStatus(
   ownerId: string,
   queueId: string,
   status: string,
 ) {
-  const { queue } = await requireOwnedQueue(ownerId, queueId);
+  const { business, queue } = await requireOwnedQueue(ownerId, queueId);
 
   if (!getQueueStatuses().includes(status)) {
     throw new QueueOperationError("Invalid queue status");
   }
+
+  // Captured before the write so a transition that really happened can be
+  // told apart from a redundant re-send of the status the queue already had.
+  const previousStatus = queue.status;
 
   const queueSession = await getOrCreateQueueSession(queueId);
 
@@ -212,13 +336,45 @@ export async function setQueueStatus(
 
   await queueSession.save();
 
-  queue.status = status;
-  await queue.save();
+  // The status move itself is the claim (see `claimStatusTransition`): of
+  // several requests that raced after reading the same previous status,
+  // exactly one can match, so a double-clicked pause writes the value
+  // twice but announces it once — and the losers report whatever the
+  // winner actually stored.
+  const claimed = await claimStatusTransition(queueId, previousStatus, status);
+
+  if (claimed) {
+    queue.status = claimed.status;
+  } else {
+    const latest = await Queue.findById(queueId);
+
+    if (latest) {
+      queue.status = latest.status;
+    }
+  }
 
   emitQueueUpdated(queueId, {
     status: queueSession.status,
     currentToken: queueSession.currentToken,
   });
+
+  // Web Push only for the request that actually performed the transition,
+  // and only if it is a transition worth announcing. Fire-and-forget:
+  // `notifyWaitingCustomers` never throws and a delivery problem cannot
+  // undo a status change that already succeeded.
+  const notificationType = claimed
+    ? queueStateNotificationType(previousStatus, status)
+    : null;
+
+  if (notificationType) {
+    void notifyWaitingCustomers({
+      type: notificationType,
+      queueId,
+      sessionId: queueSession._id.toString(),
+      business,
+      queue,
+    });
+  }
 
   return { queue, queueSession };
 }
@@ -229,6 +385,10 @@ export async function setQueueStatus(
  * The selection rule (lowest `tokenNumber` among today's `waiting` entries),
  * the "already serving" guard, the closed-session guard and the session's
  * `currentToken` bookkeeping are exactly what `POST /call-next` does.
+ *
+ * A successful call also evaluates `ALMOST_YOUR_TURN` for the customers
+ * left waiting, since a call is the only event that moves anyone's
+ * position.
  */
 export async function callNextCustomer(ownerId: string, queueId: string) {
   const { business, queue } = await requireOwnedQueue(ownerId, queueId);
@@ -286,10 +446,23 @@ export async function callNextCustomer(ownerId: string, queueId: string) {
     queueEntryId: nextEntry._id.toString(),
     queueId,
     tokenNumber: nextEntry.tokenNumber,
-    url: `/join/${business.slug}/${queue.slug}`,
+    url: buildCustomerUrl({ business, queue }),
     businessName: business.name,
     queueName: queue.name,
   });
+
+  // Calling a customer also shifted everyone else's position, which is the
+  // only moment the almost-turn threshold changes. Skipped while paused —
+  // there is no progression to announce — and deduplicated per ticket
+  // inside the helper, so re-running it can never double-alert anyone.
+  if (queueSession.status !== "paused") {
+    void notifyAlmostTurnCustomers({
+      queueId,
+      sessionId: queueSession._id.toString(),
+      business,
+      queue,
+    });
+  }
 
   return {
     queue,

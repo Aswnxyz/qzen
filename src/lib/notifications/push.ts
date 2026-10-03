@@ -72,7 +72,8 @@ export function getVapidPublicKey(): string | null {
 /**
  * Builds the wire payload for a notification.
  *
- * Switches on `type` so future kinds land here rather than in callers.
+ * Switches on `type` so every kind's copy lives here rather than in the
+ * queue mutation layer, which only decides *when* a notification is due.
  * Contains only display copy and a same-origin URL — no customer names,
  * no identifiers beyond the token the customer already sees on screen.
  */
@@ -86,6 +87,53 @@ function buildPayload(input: CustomerNotificationInput): PushNotificationPayload
         body: `Your token #${input.tokenNumber} is now being served${where}.`,
         url: input.url,
         tag: `qzen-token-called-${input.queueEntryId}`,
+      };
+    }
+
+    case "ALMOST_YOUR_TURN": {
+      const body =
+        input.peopleAhead === 1
+          ? `Your token #${input.tokenNumber} is almost up. There is 1 customer ahead of you.`
+          : `Your token #${input.tokenNumber} is approaching. There are ${input.peopleAhead} customers ahead of you.`;
+
+      return {
+        title: "Qzen — Almost Your Turn",
+        body,
+        url: input.url,
+        tag: `qzen-almost-your-turn-${input.queueEntryId}`,
+      };
+    }
+
+    case "QUEUE_PAUSED": {
+      const where = input.businessName ? ` at ${input.businessName}` : "";
+
+      return {
+        title: "Qzen — Queue Paused",
+        body: `The queue${where} is currently paused. We'll let you know when it resumes.`,
+        url: input.url,
+        tag: `qzen-queue-paused-${input.queueEntryId}`,
+      };
+    }
+
+    case "QUEUE_RESUMED": {
+      const where = input.businessName ? ` at ${input.businessName}` : "";
+
+      return {
+        title: "Qzen — Queue Resumed",
+        body: `The queue${where} has resumed. Your place in line is still active.`,
+        url: input.url,
+        tag: `qzen-queue-resumed-${input.queueEntryId}`,
+      };
+    }
+
+    case "QUEUE_CLOSED": {
+      const where = input.businessName ? ` at ${input.businessName}` : "";
+
+      return {
+        title: "Qzen — Queue Closed",
+        body: `The queue${where} has been closed.`,
+        url: input.url,
+        tag: `qzen-queue-closed-${input.queueEntryId}`,
       };
     }
 

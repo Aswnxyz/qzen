@@ -36,30 +36,56 @@ export interface PushNotificationPayload {
 }
 
 /**
- * Notification kinds Qzen may send. Phase 1 ships only `TOKEN_CALLED`;
- * the union is the extension point for future types (almost your turn,
- * queue paused/resumed/closed) without changing the notify API.
- */
-export type CustomerNotificationType = "TOKEN_CALLED";
-
-/**
- * Input accepted by `notifyCustomer()`.
+ * Fields every customer notification carries.
  *
- * `type` selects the payload template; the remaining fields are the
- * minimal domain facts needed to build it. The server derives everything
- * from the QueueEntry it just transitioned — nothing here comes from the
- * client, and callers never construct payloads directly.
+ * `queueEntryId` selects whose subscriptions receive it, so one
+ * notification always reaches exactly one ticket's devices; `url` is the
+ * customer status page every notification opens. The names are display
+ * copy only — nothing personal travels over the wire.
  */
-export type CustomerNotificationInput = {
-  type: CustomerNotificationType;
+interface CustomerNotificationContext {
   queueEntryId: string;
   queueId: string;
-} & TokenCalledDetails;
-
-interface TokenCalledDetails {
-  tokenNumber: number;
   /** Path to the customer status page, e.g. `/join/acme/salon-a`. */
   url: string;
   businessName?: string;
   queueName?: string;
 }
+
+/**
+ * Input accepted by `notifyCustomer()`.
+ *
+ * A discriminated union: `type` selects the payload template and narrows
+ * to exactly the domain facts that template needs. The server derives
+ * every field from the QueueEntry / Queue it just transitioned — nothing
+ * comes from the client, and callers never construct payloads directly.
+ *
+ * Adding a notification kind here is the whole extension mechanism: the
+ * switch in `buildPayload()` is exhaustive, so TypeScript fails the build
+ * until the new template exists.
+ */
+export type CustomerNotificationInput =
+  | ({ type: "TOKEN_CALLED"; tokenNumber: number } & CustomerNotificationContext)
+  | ({
+      type: "ALMOST_YOUR_TURN";
+      tokenNumber: number;
+      /** How many tickets are still waiting ahead of this one (1 or 2). */
+      peopleAhead: number;
+    } & CustomerNotificationContext)
+  | ({ type: "QUEUE_PAUSED" } & CustomerNotificationContext)
+  | ({ type: "QUEUE_RESUMED" } & CustomerNotificationContext)
+  | ({ type: "QUEUE_CLOSED" } & CustomerNotificationContext);
+
+/** Every notification kind Qzen sends to a customer. */
+export type CustomerNotificationType = CustomerNotificationInput["type"];
+
+/**
+ * The subset produced by a queue status transition.
+ *
+ * Derived rather than listed, so a future queue-state kind cannot be
+ * omitted from the dispatch helper that fans it out to waiting customers.
+ */
+export type QueueStateNotificationType = Extract<
+  CustomerNotificationType,
+  `QUEUE_${string}`
+>;

@@ -38,6 +38,18 @@ const queueEntrySchema = new Schema(
       type: Date,
     },
 
+    /**
+     * One-shot ALMOST_YOUR_TURN marker for this ticket's queue session.
+     *
+     * Absent (never alerted) or set (already alerted). The dispatch layer
+     * flips it with an atomic update guarded on `status: "waiting"` and a
+     * missing marker, so only the caller that wins the claim may send — and
+     * a ticket that has left `waiting` is never claimed again.
+     */
+    almostTurnNotifiedAt: {
+      type: Date,
+    },
+
     completedAt: {
       type: Date,
     },
